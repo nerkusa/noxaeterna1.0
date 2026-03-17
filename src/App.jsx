@@ -312,7 +312,7 @@ function createDefaultChar(name) {
   var allSk = [].concat(
     ["Awareness","Teaching","Streetwise","Lore","Gambling","Wilderness Survival","Navigating"],
     ["Battle Weapon","Simple Weapon","Guns","Archery"],
-    ["Acrobatics","Ride/Drive","Sleight of Hands","Stealth","Dodge"],
+    ["Acrobatics","Ride-Drive","Sleight of Hands","Stealth","Dodge"],
     ["Brawl","Resistance","Athletics","Swimming"],
     ["Charisma","Deception","Performance","Seduction"],
     ["Alchemy","Blacksmithing","Jewel Crafting","Tinkering"],
