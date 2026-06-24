@@ -1,13 +1,68 @@
 import React, { useState } from 'react';
-import { LORE_CH } from '../../data/lore';
-import LoreEditor from '../gm/LoreEditor';
 import MapView from './MapView';
+import LoreContent from '../LoreContent';
+import { normalizeSections, MAP_META } from '../../utils/lore';
 
-function LibTab(pr){var lore=pr.lore||{};var _s=useState(null);var oid=_s[0];var sO=_s[1];var ch=oid?LORE_CH.find(function(x){return x.id===oid}):null;
-if(ch&&ch.id==="map")return <div style={{display:"flex",flexDirection:"column",gap:8}}><button onClick={function(){sO(null)}} style={{alignSelf:"flex-start",padding:"4px 10px",borderRadius:6,border:"2px solid #322d24",background:"#1d1a14",fontWeight:700,fontSize:10,cursor:"pointer"}}>← Назад</button><MapView mapData={pr.mapData} saveMap={pr.saveMap} characters={pr.characters} isGM={pr.isGM} charId={pr.charId}/></div>;
-if(ch){var ct=lore[ch.id]||"";return(<div style={{display:"flex",flexDirection:"column",gap:8}}><button onClick={function(){sO(null)}} style={{alignSelf:"flex-start",padding:"4px 10px",borderRadius:6,border:"2px solid #322d24",background:"#1d1a14",fontWeight:700,fontSize:10,cursor:"pointer"}}>← Назад</button><div style={{textAlign:"center"}}><div style={{fontSize:28}}>{ch.icon}</div><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:ch.color,marginTop:4}}>{ch.title}</div></div>{ct.trim()?<div style={{background:"#262219",border:"2px solid #322d24",borderRadius:10,padding:"12px 10px"}}>{ct.split("\n").map(function(l,i){if(l.startsWith("### "))return <div key={i} style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,marginTop:8}}>{l.slice(4)}</div>;if(l.startsWith("## "))return <div key={i} style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:ch.color,marginTop:10}}>{l.slice(3)}</div>;if(l.startsWith("# "))return <div key={i} style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:17,marginTop:12}}>{l.slice(2)}</div>;if(l.startsWith("---"))return <hr key={i} style={{border:"none",borderTop:"1px solid #322d24",margin:"8px 0"}}/>;if(l.startsWith("- "))return <div key={i} style={{fontSize:10,paddingLeft:12}}>• {l.slice(2)}</div>;if(!l.trim())return <div key={i} style={{height:6}}/>;return <div key={i} style={{fontSize:10,lineHeight:1.6}}>{l}</div>})}</div>:<div style={{textAlign:"center",padding:20,color:"#a89a82"}}><div style={{fontSize:24}}>📜</div><div style={{fontSize:12,fontWeight:700}}>Готовится</div></div>}</div>)}
-return(<div style={{display:"flex",flexDirection:"column",gap:5}}><div style={{textAlign:"center",padding:"8px 0"}}><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:16}}>📚 Лорбук</div></div>{LORE_CH.map(function(ch){var has=lore[ch.id]&&lore[ch.id].trim();return <button key={ch.id} onClick={function(){sO(ch.id)}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:9,border:"2px solid "+ch.color+"18",background:ch.color+"06",cursor:"pointer",textAlign:"left",opacity:has?1:0.6}}><div style={{width:30,height:30,borderRadius:6,background:ch.color+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{ch.icon}</div><div style={{flex:1}}><div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10}}>{ch.title}</div></div><span style={{color:"#c4b8a4"}}>›</span></button>})}</div>)}
+const backBtn = { alignSelf: 'flex-start', padding: '5px 12px', borderRadius: 6, border: '2px solid #322d24', background: '#1d1a14', color: '#ece5d8', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
 
-/* ── LoreEditor ── */
+function Card(pr) {
+  const meta = pr.meta;
+  const color = meta.color || '#8b5cf6';
+  return (
+    <button onClick={pr.onClick} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, border: '2px solid ' + color + '22', background: color + '0e', cursor: 'pointer', textAlign: 'left' }}>
+      <div style={{ width: 34, height: 34, borderRadius: 8, background: color + '1e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{meta.icon}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 12, color: '#ece5d8' }}>{meta.title}</div>
+        {pr.subtitle && <div style={{ fontSize: 9, color: '#a89a82', marginTop: 1 }}>{pr.subtitle}</div>}
+      </div>
+      <span style={{ color: color }}>›</span>
+    </button>
+  );
+}
 
-export default LibTab;
+export default function LibTab(pr) {
+  const lore = pr.lore || {};
+  const [openId, setOpenId] = useState(null);
+  const sections = normalizeSections(lore);
+
+  if (openId === 'map') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <button onClick={function () { setOpenId(null); }} style={backBtn}>← Назад</button>
+        <MapView mapData={pr.mapData} saveMap={pr.saveMap} characters={pr.characters} isGM={pr.isGM} charId={pr.charId} />
+      </div>
+    );
+  }
+
+  const sec = sections.find(function (s) { return s.id === openId; });
+  if (sec) {
+    const hasContent = (sec.blocks || []).some(function (b) {
+      return (b.type === 'image' && b.value) || (b.value && b.value.trim());
+    });
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <button onClick={function () { setOpenId(null); }} style={backBtn}>← Назад</button>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 28 }}>{sec.icon}</div>
+          <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 16, color: sec.color, marginTop: 4 }}>{sec.title}</div>
+        </div>
+        {hasContent
+          ? <LoreContent section={sec} />
+          : <div style={{ textAlign: 'center', padding: 20, color: '#a89a82' }}><div style={{ fontSize: 24 }}>📜</div><div style={{ fontSize: 12, fontWeight: 700 }}>Пусто</div></div>}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ textAlign: 'center', padding: '8px 0' }}>
+        <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 17 }}>📚 Лорбук</div>
+      </div>
+      <Card meta={MAP_META} subtitle="🗺️ Карта мира" onClick={function () { setOpenId('map'); }} />
+      {sections.map(function (s) {
+        return <Card key={s.id} meta={s} onClick={function () { setOpenId(s.id); }} />;
+      })}
+      {sections.length === 0 && <div style={{ textAlign: 'center', padding: 16, color: '#a89a82', fontSize: 11 }}>Разделов пока нет</div>}
+    </div>
+  );
+}
