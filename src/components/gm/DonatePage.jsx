@@ -47,7 +47,7 @@ var CONDITIONS=[
   "Налог на донат. 50% стоимости выплачивается заданиями от ДМа.",
 ];
 
-var S2={inp:{width:"100%",padding:"4px 6px",border:"1px solid #4b3800",borderRadius:5,fontSize:9,fontFamily:"'Nunito',sans-serif",background:"#1a1008",color:"#fef3c7",outline:"none"}};
+var S2={inp:{width:"100%",padding:"4px 6px",border:"1px solid #4b3800",borderRadius:5,fontSize:9,fontFamily:"'Nunito',sans-serif",background:"#1a1008",color:"#231b08",outline:"none"}};
 
 return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:1000,overflowY:"auto",fontFamily:"'Nunito',sans-serif"}}>
 <div style={{maxWidth:560,margin:"0 auto",padding:"16px 12px 40px"}}>
@@ -58,7 +58,7 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zInde
   <div style={{display:"flex",gap:6,alignItems:"center"}}>
     {isGM&&<button onClick={function(){sEditMode(!editMode);sEditPack(null)}} style={{padding:"4px 12px",borderRadius:5,border:"2px solid #f59e0b",background:editMode?"#f59e0b":"transparent",color:editMode?"#1a1008":"#f59e0b",cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif"}}>{editMode?"✓ Готово":"✏️ Редактировать"}</button>}
     {!isGM&&<span style={{fontSize:8,color:"#b8ad97",fontStyle:"italic"}}>режим просмотра</span>}
-    <button onClick={onClose} style={{background:"none",border:"1px solid #3a3429",borderRadius:5,padding:"4px 12px",color:"#e8e0d4",cursor:"pointer",fontSize:10}}>✕ Закрыть</button>
+    <button onClick={onClose} style={{background:"none",border:"1px solid #3a3429",borderRadius:5,padding:"4px 12px",color:"#ece5d8",cursor:"pointer",fontSize:10}}>✕ Закрыть</button>
   </div>
 </div>
 
@@ -103,7 +103,7 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zInde
       <div style={{fontSize:20,flexShrink:0,marginTop:1}}>{p.icon}</div>
       <div style={{flex:1}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-          <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:"#fef3c7"}}>{p.name}</span>
+          <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:"#231b08"}}>{p.name}</span>
           <span style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:10,color:"#f59e0b",background:"#2d1f00",borderRadius:4,padding:"1px 6px",whiteSpace:"nowrap",flexShrink:0,marginLeft:6}}>{p.price}</span>
         </div>
         {p.items.map(function(it,j){return<div key={j} style={{fontSize:8,color:"#d97706",lineHeight:1.6}}>• {it}</div>})}
@@ -135,7 +135,7 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zInde
 </div>
 
 {/* Conditions */}
-<div style={{background:"#0d0d0d",border:"1px solid #1f2937",borderRadius:10,padding:"12px 14px",marginBottom:8}}>
+<div style={{background:"#0d0d0d",border:"1px solid #ece5d8",borderRadius:10,padding:"12px 14px",marginBottom:8}}>
   <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:9,color:"#9a8f7c",marginBottom:8}}>📜 Условия использования</div>
   {CONDITIONS.map(function(c,i){return<div key={i} style={{fontSize:8,color:"#b8ad97",lineHeight:1.7}}>⚠️ {c}</div>})}
 </div>

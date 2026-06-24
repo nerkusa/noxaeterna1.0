@@ -59,7 +59,7 @@ function PendingAttackPopup(pr){
         {atk.weaponName&&<div style={{fontSize:9,color:"#a89a82",marginTop:2}}>{atk.weaponName+" · "+atk.dmgType}</div>}
       </div>
       {/* Уклонение — кнопка или результат */}
-      <div style={{background:"#262219",border:"1px solid "+(waiting?"#d1d5db":shieldPhase?"#0369a140":"#10b98140"),borderRadius:10,padding:"8px 12px",marginBottom:waiting?10:0}}>
+      <div style={{background:"#262219",border:"1px solid "+(waiting?"#3a3429":shieldPhase?"#38bdf840":"#10b98140"),borderRadius:10,padding:"8px 12px",marginBottom:waiting?10:0}}>
         <div style={{fontSize:8,color:"#9a8f7c",marginBottom:4}}>Твоё уклонение</div>
         {waiting
           ?<div>
@@ -70,7 +70,7 @@ function PendingAttackPopup(pr){
           :<div>
             {dodgeDetail&&<div style={{fontSize:9,color:"#9a8f7c",marginBottom:4}}>{dodgeDetail}</div>}
             <div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:dodged?"#10b981":"#ef4444"}}>{atk.dodgeRoll||0}</div>
-            <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:dodged?"#065f46":"#991b1b",marginTop:4}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:dodged?"#34d399":"#f87171",marginTop:4}}>
               {dodged?"✅ Уклонился!":shieldPhase?"❌ Попало! Выбери защиту:":"❌ Попало!"}
             </div>
             {shieldPhase&&(function(){
@@ -80,7 +80,7 @@ function PendingAttackPopup(pr){
               var is2h=equippedW&&(equippedW.hands===2||(equippedW.hands===1.5&&(myChar.weaponMode||"1h")==="2h"));
               var canShield=shObj&&shObj.hp>0&&!is2h;
               return(<div style={{marginTop:8,display:"flex",flexDirection:"column",gap:6}}>
-                {canShield&&<button onClick={function(){update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{status:"pending_dmg",shieldUsed:true,shieldAbsorb:shObj.absorb,shieldName:shObj.name,shieldId:shObj.id});}} style={{width:"100%",padding:10,borderRadius:8,border:"none",background:"#0369a1",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13,cursor:"pointer"}}>🛡 Выставить {shObj.name} ({shObj.absorb*100}% поглощения)</button>}
+                {canShield&&<button onClick={function(){update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{status:"pending_dmg",shieldUsed:true,shieldAbsorb:shObj.absorb,shieldName:shObj.name,shieldId:shObj.id});}} style={{width:"100%",padding:10,borderRadius:8,border:"none",background:"#38bdf8",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13,cursor:"pointer"}}>🛡 Выставить {shObj.name} ({shObj.absorb*100}% поглощения)</button>}
                 {canShield&&<div style={{fontSize:8,color:"#a89a82",textAlign:"center"}}>HP щита: {shObj.hp}/{shObj.maxHp}</div>}
                 {!canShield&&shObj&&shObj.hp<=0&&<div style={{fontSize:9,color:"#ef4444",textAlign:"center",fontWeight:700}}>💔 Щит сломан</div>}
                 {!shObj&&<div style={{fontSize:9,color:"#a89a82",textAlign:"center",fontStyle:"italic"}}>Нет щита</div>}

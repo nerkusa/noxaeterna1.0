@@ -44,13 +44,13 @@ function PlayerAttackNotif(pr){
       <div style={{background:"#221e17",border:"3px solid "+(dodgedNpc?"#10b981":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
         <div style={{display:"flex",justifyContent:"flex-end",marginBottom:2}}><button onClick={skipNpcDmg} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"#a89a82"}}>✕</button></div>
         <div style={{fontSize:24,marginBottom:4}}>{dodgedNpc?"🛡️":"💥"}</div>
-        <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,color:dodgedNpc?"#065f46":"#dc2626",marginBottom:8}}>{dmgAtk.attackerName+" vs "+dmgAtk.npcName}</div>
+        <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,color:dodgedNpc?"#34d399":"#dc2626",marginBottom:8}}>{dmgAtk.attackerName+" vs "+dmgAtk.npcName}</div>
         <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:10}}>
           <div style={{textAlign:"center",background:"#2a1414",borderRadius:8,padding:"6px 14px"}}><div style={{fontSize:8,color:"#9a8f7c",marginBottom:1}}>Атака</div><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:26,color:"#ef4444"}}>{dmgAtk.hitRoll}</div></div>
           <div style={{fontSize:15,color:"#a89a82",fontWeight:700,alignSelf:"center"}}>vs</div>
           <div style={{textAlign:"center",background:"#0e2018",borderRadius:8,padding:"6px 14px"}}><div style={{fontSize:8,color:"#9a8f7c",marginBottom:1}}>Уклонение</div><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:26,color:"#10b981"}}>{dmgAtk.dodgeRoll||0}</div></div>
         </div>
-        <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:dodgedNpc?"#065f46":"#991b1b",marginBottom:10}}>{dodgedNpc?"✅ NPC уклонился!":"❌ Попало!"}</div>
+        <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:dodgedNpc?"#34d399":"#f87171",marginBottom:10}}>{dodgedNpc?"✅ NPC уклонился!":"❌ Попало!"}</div>
         {dodgedNpc
           ?<button onClick={skipNpcDmg} style={{width:"100%",padding:8,borderRadius:8,border:"none",background:"#10b981",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13,cursor:"pointer"}}>✅ Закрыть</button>
           :<div style={{marginTop:4,padding:"8px",background:"#2a1414",borderRadius:8,fontSize:10,color:"#a89a82",fontStyle:"italic",textAlign:"center"}}>⚔️ Игрок бросает урон...</div>

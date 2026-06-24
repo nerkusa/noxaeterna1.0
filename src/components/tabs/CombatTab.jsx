@@ -64,16 +64,16 @@ return(<div style={{display:"flex",flexDirection:"column",gap:8}}>
 <label style={Object.assign({},S.lb,{color:"#ef4444"})}>⚔️ Враги на поле боя</label>
 <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:3}}>
 {spawnedArr.map(function(e){var nid=e[0];var n=e[1];var nHp=n.hp!==undefined?n.hp:n.maxHp;var hpPct=n.maxHp>0?(nHp/n.maxHp)*100:0;var isSel=tgtId===nid;
-return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padding:"4px 8px",borderRadius:7,border:"2px solid "+(isSel?"#ef4444":"#e8e0d4"),background:isSel?"#fee2e2":"#fefdfb",fontSize:9,fontWeight:isSel?700:400,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:60}}>
+return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padding:"4px 8px",borderRadius:7,border:"2px solid "+(isSel?"#ef4444":"#322d24"),background:isSel?"#311717":"#1d1a14",fontSize:9,fontWeight:isSel?700:400,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:60}}>
 <span style={{fontWeight:700}}>{n.name}</span>
 <div style={{width:50,height:5,background:"#262219",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:hpPct+"%",background:hpPct<=25?"#ef4444":hpPct<=50?"#f59e0b":"#10b981",borderRadius:3}}/></div>
 <span style={{fontSize:7,color:"#a89a82"}}>{nHp+"/"+n.maxHp+" HP"}</span>
 </button>})}
 </div>
-{tgtNpc&&<div style={{marginTop:5,paddingTop:5,borderTop:"1px solid #fecaca"}}>
+{tgtNpc&&<div style={{marginTop:5,paddingTop:5,borderTop:"1px solid #3a1c1c"}}>
 <label style={Object.assign({},S.lb,{color:"#ef4444",marginBottom:3})}>🎯 Зона удара → {tgtNpc.name}</label>
 <div style={{display:"flex",flexWrap:"wrap",gap:2}}>
-{ZONES.map(function(z){var isSel=selZone===z.name;return <button key={z.name} onClick={function(){sZone(z.name)}} style={{padding:"2px 6px",borderRadius:5,border:"2px solid "+(isSel?"#f59e0b":"#e8e0d4"),background:isSel?"#fffbeb":"#fefdfb",fontSize:8,fontWeight:isSel?700:400,cursor:"pointer"}}>{z.e+" "+z.name+(z.ignoreArmor?" 🔓":"")+" ×"+z.mult}</button>})}
+{ZONES.map(function(z){var isSel=selZone===z.name;return <button key={z.name} onClick={function(){sZone(z.name)}} style={{padding:"2px 6px",borderRadius:5,border:"2px solid "+(isSel?"#f59e0b":"#322d24"),background:isSel?"#231b08":"#1d1a14",fontSize:8,fontWeight:isSel?700:400,cursor:"pointer"}}>{z.e+" "+z.name+(z.ignoreArmor?" 🔓":"")+" ×"+z.mult}</button>})}
 </div>
 </div>}
 </div>}
@@ -88,7 +88,7 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
       <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:"#ef4444",marginBottom:4}}>⚔️ Стойкость Дуэлянта</div>
       <div style={{fontSize:8,color:"#9a8f7c",marginBottom:6}}>{warActive?"Активен — следующая атака +5":"Один раз в день: +5 к атаке в одном ходу"}</div>
       <div style={{display:"flex",gap:4}}>
-        <button disabled={warUsed} onClick={function(){sv(Object.assign({},c,{warriorBonus:true,warriorBonusUsed:true}))}} style={{flex:1,padding:"6px",borderRadius:7,border:"none",background:warUsed?"#e5e7eb":warActive?"#10b981":"#ef4444",color:warUsed?"#9ca3af":"#fff",fontWeight:700,fontSize:10,cursor:warUsed?"not-allowed":"pointer"}}>{warUsed?(warActive?"⚔️ +5 активен":"✓ Использовано сегодня"):"⚔️ Активировать +5"}</button>
+        <button disabled={warUsed} onClick={function(){sv(Object.assign({},c,{warriorBonus:true,warriorBonusUsed:true}))}} style={{flex:1,padding:"6px",borderRadius:7,border:"none",background:warUsed?"#322d24":warActive?"#10b981":"#ef4444",color:warUsed?"#8d8270":"#fff",fontWeight:700,fontSize:10,cursor:warUsed?"not-allowed":"pointer"}}>{warUsed?(warActive?"⚔️ +5 активен":"✓ Использовано сегодня"):"⚔️ Активировать +5"}</button>
         {warActive&&<button onClick={function(){sv(Object.assign({},c,{warriorBonus:false}))}} style={{padding:"6px 10px",borderRadius:7,border:"1px solid #322d24",background:"#1d1a14",fontSize:9,cursor:"pointer",color:"#a89a82"}}>Снять</button>}
         {warUsed&&<button onClick={function(){sv(Object.assign({},c,{warriorBonus:false,warriorBonusUsed:false}))}} title="Сбросить (новый день)" style={{padding:"6px 8px",borderRadius:7,border:"1px solid #322d24",background:"#1d1a14",fontSize:9,cursor:"pointer",color:"#a89a82"}}>🔄</button>}
       </div>
@@ -152,15 +152,15 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 }} style={{padding:7,borderRadius:7,border:"2px solid #7c3aed20",background:"#1f1330",cursor:"pointer",fontWeight:700,fontSize:10,color:"#7c3aed"}}>{"🔮 Закл. (−1W) "+(curW<=0?"⛔":"")+(tgtNpc?" → "+tgtNpc.name:"")}</button>}
 
 {/* Оружие */}
-<div>
-<div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><label style={S.lb}>⚔️ Оружие</label><button onClick={function(){sSA(!sa)}} style={{fontSize:8,background:"none",border:"none",cursor:"pointer",color:"#10b981",fontWeight:700}}>{sa?"✕":"+"}</button></div>
+<div style={{background:"#262219",border:"2px solid #f59e0b18",borderRadius:9,padding:"7px 8px"}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><label style={S.lb}>⚔️ Оружие</label><button onClick={function(){sSA(!sa)}} style={{fontSize:8,background:"none",border:"none",cursor:"pointer",color:"#f0b352",fontWeight:700}}>{sa?"✕":"+ Оружие"}</button></div>
 {sa&&<div style={{background:"#262219",border:"1px solid #322d24",borderRadius:8,padding:6,marginBottom:4,display:"flex",flexDirection:"column",gap:3}}>
 <input style={S.inp} value={wn} onChange={function(e){sWN(e.target.value)}} placeholder="Название"/>
 <div style={{display:"flex",gap:3}}>
 <select value={wt} onChange={function(e){sWT(e.target.value)}} style={Object.assign({},S.inp,{flex:1,fontSize:9,padding:3})}>{WT.map(function(t){return <option key={t} value={t}>{t}</option>})}</select>
 <select value={wdt} onChange={function(e){sWDT(e.target.value)}} style={Object.assign({},S.inp,{width:38,fontSize:9,padding:3})}>{DT.map(function(t){return <option key={t} value={t}>{t}</option>})}</select>
 </div>
-<div style={{display:"flex",gap:3}}>{[1,1.5,2].map(function(h){return<button key={h} onClick={function(){sWH(h)}} style={{flex:1,padding:"3px 0",borderRadius:5,border:wh===h?"2px solid #3b82f6":"1px solid #e8e0d4",background:wh===h?"#eff6ff":"#fefdfb",fontSize:8,fontWeight:wh===h?700:400,cursor:"pointer",color:wh===h?"#1d4ed8":"#5c5548"}}>{h===1?"Одноручное":h===1.5?"Полуторное":"Двуручное"}</button>})}</div>
+<div style={{display:"flex",gap:3}}>{[1,1.5,2].map(function(h){return<button key={h} onClick={function(){sWH(h)}} style={{flex:1,padding:"3px 0",borderRadius:5,border:wh===h?"2px solid #3b82f6":"1px solid #322d24",background:wh===h?"#0e1a2b":"#1d1a14",fontSize:8,fontWeight:wh===h?700:400,cursor:"pointer",color:wh===h?"#60a5fa":"#b3a890"}}>{h===1?"Одноручное":h===1.5?"Полуторное":"Двуручное"}</button>})}</div>
 {wh!==1.5
 ?<div style={{display:"flex",gap:3}}><input style={Object.assign({},S.inp,{flex:1,fontSize:9,padding:3})} value={wdi} onChange={function(e){sWDI(e.target.value)}} placeholder="1d6"/><input style={Object.assign({},S.inp,{width:40,fontSize:9,padding:3})} type="number" value={wb} onChange={function(e){sWB(parseInt(e.target.value)||0)}} placeholder="Бнс"/></div>
 :<div style={{display:"flex",flexDirection:"column",gap:3}}>
@@ -169,17 +169,18 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 </div>}
 <button onClick={function(){if(!wn.trim())return;var newW={id:Date.now(),name:wn.trim(),type:wt,dmgType:wdt,bonus:wb,dmgDice:wdi,hands:wh};if(wh===1.5){newW.dmgDice2h=wdi2;newW.bonus2h=wb2;}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([newW])}));sWN("");sSA(false);sWH(1);sWDI("1d6");sWDI2("2d6");sWB2(0);}} style={{padding:5,borderRadius:5,border:"none",background:"#10b981",color:"#fff",fontWeight:700,fontSize:10,cursor:"pointer"}}>Добавить</button>
 </div>}
-{(c.weapons||[]).map(function(w){var sk=WS[w.type]||"Simple Weapon";var isEq=c.equippedWeapon===w.id;var curMode=c.weaponMode||"1h";var activeDice=(w.hands===1.5&&curMode==="2h")?(w.dmgDice2h||w.dmgDice):w.dmgDice;var activeBon=(w.hands===1.5&&curMode==="2h")?(w.bonus2h!==undefined?w.bonus2h:w.bonus||0):(w.bonus||0);var handsLabel=w.hands===2?"двуручное":w.hands===1.5?"полуторное":"одноручное";var handsClr=w.hands===2?"#991b1b":w.hands===1.5?"#92400e":"#1e40af";var handsBg=w.hands===2?"#fee2e2":w.hands===1.5?"#fef3c7":"#eff6ff";
-return(<div key={w.id} style={{background:isEq?"#f0fdf4":"#fefdfb",border:"1px solid "+(isEq?"#10b98130":"#e8e0d4"),borderRadius:8,padding:"5px 7px",marginBottom:3}}>
+{(c.weapons||[]).length===0&&!sa&&<div style={{textAlign:"center",padding:"10px 6px",color:"#a89a82",fontStyle:"italic",fontSize:9,border:"1px dashed #322d24",borderRadius:7}}>Нет оружия — нажми «+ Оружие», чтобы добавить</div>}
+{(c.weapons||[]).map(function(w){var sk=WS[w.type]||"Simple Weapon";var isEq=c.equippedWeapon===w.id;var curMode=c.weaponMode||"1h";var activeDice=(w.hands===1.5&&curMode==="2h")?(w.dmgDice2h||w.dmgDice):w.dmgDice;var activeBon=(w.hands===1.5&&curMode==="2h")?(w.bonus2h!==undefined?w.bonus2h:w.bonus||0):(w.bonus||0);var handsLabel=w.hands===2?"двуручное":w.hands===1.5?"полуторное":"одноручное";var handsClr=w.hands===2?"#f87171":w.hands===1.5?"#f0b352":"#60a5fa";var handsBg=w.hands===2?"#311717":w.hands===1.5?"#231b08":"#0e1a2b";
+return(<div key={w.id} style={{background:isEq?"#0e2018":"#1d1a14",border:"1px solid "+(isEq?"#10b98130":"#322d24"),borderRadius:8,padding:"5px 7px",marginBottom:3}}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:3}}>
 <div style={{flex:1}}><span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11}}>{w.name}</span><span style={{fontSize:7,color:"#a89a82",marginLeft:4}}>{w.type+" · "+activeDice+" · "+w.dmgType}</span><span style={{fontSize:7,marginLeft:3,padding:"1px 4px",borderRadius:3,background:handsBg,color:handsClr}}>{handsLabel}</span></div>
 <div style={{display:"flex",gap:3,flexShrink:0}}>
-<button onClick={function(){var newEq=isEq?null:w.id;var upd={equippedWeapon:newEq};if(w.hands===2&&c.equippedShield)upd.equippedShield=null;sv(Object.assign({},c,upd));}} style={{fontSize:7,padding:"2px 6px",borderRadius:3,border:isEq?"1px solid #10b98140":"1px solid #e8e0d4",background:isEq?"#d1fae5":"#fefdfb",cursor:"pointer",color:isEq?"#065f46":"#5c5548",fontWeight:700}}>{isEq?"✓ Снаряжено":"Снарядить"}</button>
-{!isEq&&<button onClick={function(){sv(Object.assign({},c,{weapons:(c.weapons||[]).filter(function(x){return x.id!==w.id})}))}} style={{background:"none",border:"none",color:"#ef4444",fontSize:10,cursor:"pointer"}}>✕</button>}{isEq&&<span title="Сначала снимите" style={{fontSize:10,color:"#d1d5db",cursor:"not-allowed",padding:"0 4px"}}>✕</span>}
+<button onClick={function(){var newEq=isEq?null:w.id;var upd={equippedWeapon:newEq};if(w.hands===2&&c.equippedShield)upd.equippedShield=null;sv(Object.assign({},c,upd));}} style={{fontSize:7,padding:"2px 6px",borderRadius:3,border:isEq?"1px solid #10b98140":"1px solid #322d24",background:isEq?"#123424":"#1d1a14",cursor:"pointer",color:isEq?"#34d399":"#b3a890",fontWeight:700}}>{isEq?"✓ Снаряжено":"Снарядить"}</button>
+{!isEq&&<button onClick={function(){sv(Object.assign({},c,{weapons:(c.weapons||[]).filter(function(x){return x.id!==w.id})}))}} style={{background:"none",border:"none",color:"#ef4444",fontSize:10,cursor:"pointer"}}>✕</button>}{isEq&&<span title="Сначала снимите" style={{fontSize:10,color:"#3a3429",cursor:"not-allowed",padding:"0 4px"}}>✕</span>}
 </div></div>
 {w.hands===1.5&&<div style={{display:"flex",gap:3,marginBottom:3}}>
-<button onClick={function(){sv(Object.assign({},c,{weaponMode:"1h"}))}} style={{flex:1,padding:"2px 0",borderRadius:4,border:curMode==="1h"?"2px solid #3b82f6":"1px solid #e8e0d4",background:curMode==="1h"?"#eff6ff":"#fefdfb",fontSize:8,fontWeight:curMode==="1h"?700:400,cursor:"pointer",color:curMode==="1h"?"#1d4ed8":"#5c5548"}}>1 рука · {w.dmgDice}{w.bonus?" +"+w.bonus:""}</button>
-<button onClick={function(){var upd={weaponMode:"2h"};if(c.equippedShield)upd.equippedShield=null;sv(Object.assign({},c,upd));}} style={{flex:1,padding:"2px 0",borderRadius:4,border:curMode==="2h"?"2px solid #3b82f6":"1px solid #e8e0d4",background:curMode==="2h"?"#eff6ff":"#fefdfb",fontSize:8,fontWeight:curMode==="2h"?700:400,cursor:"pointer",color:curMode==="2h"?"#1d4ed8":"#5c5548"}}>2 руки · {w.dmgDice2h||w.dmgDice}{w.bonus2h!==undefined?" +"+w.bonus2h:""}</button>
+<button onClick={function(){sv(Object.assign({},c,{weaponMode:"1h"}))}} style={{flex:1,padding:"2px 0",borderRadius:4,border:curMode==="1h"?"2px solid #3b82f6":"1px solid #322d24",background:curMode==="1h"?"#0e1a2b":"#1d1a14",fontSize:8,fontWeight:curMode==="1h"?700:400,cursor:"pointer",color:curMode==="1h"?"#60a5fa":"#b3a890"}}>1 рука · {w.dmgDice}{w.bonus?" +"+w.bonus:""}</button>
+<button onClick={function(){var upd={weaponMode:"2h"};if(c.equippedShield)upd.equippedShield=null;sv(Object.assign({},c,upd));}} style={{flex:1,padding:"2px 0",borderRadius:4,border:curMode==="2h"?"2px solid #3b82f6":"1px solid #322d24",background:curMode==="2h"?"#0e1a2b":"#1d1a14",fontSize:8,fontWeight:curMode==="2h"?700:400,cursor:"pointer",color:curMode==="2h"?"#60a5fa":"#b3a890"}}>2 руки · {w.dmgDice2h||w.dmgDice}{w.bonus2h!==undefined?" +"+w.bonus2h:""}</button>
 </div>}
 <div style={{display:"flex",gap:3}}>
 <button onClick={function(){var d=r1(10);var rv=fs.REF||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&pf.id==="warrior")?5:0;if(warBon)sv(Object.assign({},c,{warriorBonus:false}));var t=d+rv+sv2+(w.bonus||0)+warBon;pr.addLog({who:c.name||"???",type:"hit",label:"🎯 "+w.name+(tgtNpc?" → "+tgtNpc.name:"")+(warBon?" ⚔️+5":""),detail:"🎲"+d+" + REF("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+") = "+t,total:t});

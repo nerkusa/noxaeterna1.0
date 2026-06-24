@@ -62,7 +62,7 @@ function GMAttackPanel(pr){
   function skipDmg(){remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id));}
 
   return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:997,animation:"fadeIn 0.2s"}}>
-    <div style={{background:"#221e17",border:"3px solid "+(waiting?"#f59e0b":dodged?"#10b981":shieldPhaseGM?"#0369a1":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
+    <div style={{background:"#221e17",border:"3px solid "+(waiting?"#f59e0b":dodged?"#10b981":shieldPhaseGM?"#38bdf8":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
       <div style={{display:"flex",justifyContent:"flex-end",marginBottom:2}}><button onClick={skipDmg} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"#a89a82",lineHeight:1}}>✕</button></div>
       {active.length>1&&<div style={{fontSize:9,color:"#a89a82",marginBottom:4}}>{"Сцена 1 из "+active.length}</div>}
       <div style={{fontSize:24,marginBottom:4}}>{waiting?"⚔️":dodged?"🛡️":shieldPhaseGM?"⏳":"💥"}</div>
@@ -94,7 +94,7 @@ function GMAttackPanel(pr){
       </div>
 
       {/* Уклонение — ждём или показываем */}
-      <div style={{background:"#262219",border:"1px solid "+(waiting?"#d1d5db":shieldPhaseGM?"#0369a140":"#10b98140"),borderRadius:10,padding:"8px 12px",marginBottom:10}}>
+      <div style={{background:"#262219",border:"1px solid "+(waiting?"#3a3429":shieldPhaseGM?"#38bdf840":"#10b98140"),borderRadius:10,padding:"8px 12px",marginBottom:10}}>
         <div style={{fontSize:8,color:"#9a8f7c",marginBottom:4}}>Уклонение {atk.targetName}</div>
         {waiting
           ?<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"6px 0"}}>
@@ -104,10 +104,10 @@ function GMAttackPanel(pr){
           :<div>
             <div style={{fontSize:9,color:"#9a8f7c",marginBottom:4}}>{dodgeDetail}</div>
             <div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:dodged?"#10b981":"#ef4444"}}>{atk.dodgeRoll||0}</div>
-            <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:dodged?"#065f46":shieldPhaseGM?"#0369a1":"#991b1b",marginTop:4}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:dodged?"#34d399":shieldPhaseGM?"#38bdf8":"#f87171",marginTop:4}}>
               {dodged?"✅ Уклонился!":shieldPhaseGM?"❌ Попало! Игрок выбирает щит...": "❌ Попало!"}
             </div>
-            {shieldPhaseGM&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:4,padding:"4px 0",background:"#0e2236",borderRadius:6}}><div style={{width:6,height:6,borderRadius:"50%",background:"#0369a1"}}/><span style={{fontSize:10,color:"#38bdf8",fontStyle:"italic"}}>ждём решения...</span></div>}
+            {shieldPhaseGM&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:4,padding:"4px 0",background:"#0e2236",borderRadius:6}}><div style={{width:6,height:6,borderRadius:"50%",background:"#38bdf8"}}/><span style={{fontSize:10,color:"#38bdf8",fontStyle:"italic"}}>ждём решения...</span></div>}
           </div>
         }
       </div>
