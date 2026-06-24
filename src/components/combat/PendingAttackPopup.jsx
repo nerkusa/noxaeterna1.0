@@ -36,39 +36,39 @@ function PendingAttackPopup(pr){
     update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:0,status:"pending_shield"});
   }
   return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:998,animation:"fadeIn 0.2s"}}>
-    <div style={{background:"#fefcf5",border:"3px solid "+(waiting?"#ef4444":dodged?"#10b981":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
+    <div style={{background:"#221e17",border:"3px solid "+(waiting?"#ef4444":dodged?"#10b981":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
-        <div style={{fontSize:9,color:"#8b7e6a"}}>{pending.length>1?"Атака 1 из "+pending.length:""}</div>
-        <button onClick={function(){update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{status:"done"}).then(function(){remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id));})}} style={{background:"none",border:"none",fontSize:16,cursor:"pointer",color:"#9ca3af",lineHeight:1}} title="Отменить атаку">✕</button>
+        <div style={{fontSize:9,color:"#a89a82"}}>{pending.length>1?"Атака 1 из "+pending.length:""}</div>
+        <button onClick={function(){update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{status:"done"}).then(function(){remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id));})}} style={{background:"none",border:"none",fontSize:16,cursor:"pointer",color:"#8d8270",lineHeight:1}} title="Отменить атаку">✕</button>
       </div>
       <div style={{fontSize:24,marginBottom:4}}>{waiting?"⚔️":dodged?"🛡️":shieldPhase?"🛡":"💥"}</div>
       <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#dc2626",marginBottom:8}}>{atk.attackerName+" атакует "+myChar.name+"!"}</div>
       {/* Бросок атаки с деталями */}
-      <div style={{background:"#fff",border:"1px solid #e8e0d4",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
-        <div style={{fontSize:8,color:"#6b7280",marginBottom:4}}>Бросок на попадание</div>
+      <div style={{background:"#262219",border:"1px solid #322d24",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
+        <div style={{fontSize:8,color:"#9a8f7c",marginBottom:4}}>Бросок на попадание</div>
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,flexWrap:"wrap",marginBottom:6}}>
           <span style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:900,color:atkD===10?"#d97706":atkD===1?"#dc2626":"#3b82f6"}}>{"🎲"+(atkD||atk.hitRoll)}</span>
-          {atkREF>0&&<span style={{color:"#8b7e6a"}}>+</span>}
-          {atkREF>0&&<span style={{background:"#f5f0e8",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#8b7e6a",fontSize:7,display:"block"}}>REF</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkREF}</span></span>}
-          {atkSkill>0&&<span style={{color:"#8b7e6a"}}>+</span>}
-          {atkSkill>0&&<span style={{background:"#f5f0e8",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#8b7e6a",fontSize:7,display:"block"}}>{atkSkillName}</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkSkill}</span></span>}
-          {atkBonus!==0&&<span style={{color:"#8b7e6a"}}>+</span>}
-          {atkBonus!==0&&<span style={{background:"#f5f0e8",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#8b7e6a",fontSize:7,display:"block"}}>Бнс</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkBonus}</span></span>}
+          {atkREF>0&&<span style={{color:"#a89a82"}}>+</span>}
+          {atkREF>0&&<span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>REF</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkREF}</span></span>}
+          {atkSkill>0&&<span style={{color:"#a89a82"}}>+</span>}
+          {atkSkill>0&&<span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>{atkSkillName}</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkSkill}</span></span>}
+          {atkBonus!==0&&<span style={{color:"#a89a82"}}>+</span>}
+          {atkBonus!==0&&<span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>Бнс</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkBonus}</span></span>}
         </div>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:"#dc2626"}}>{"= "+atk.hitRoll}</div>
-        {atk.weaponName&&<div style={{fontSize:9,color:"#8b7e6a",marginTop:2}}>{atk.weaponName+" · "+atk.dmgType}</div>}
+        {atk.weaponName&&<div style={{fontSize:9,color:"#a89a82",marginTop:2}}>{atk.weaponName+" · "+atk.dmgType}</div>}
       </div>
       {/* Уклонение — кнопка или результат */}
-      <div style={{background:"#fff",border:"1px solid "+(waiting?"#d1d5db":shieldPhase?"#0369a140":"#10b98140"),borderRadius:10,padding:"8px 12px",marginBottom:waiting?10:0}}>
-        <div style={{fontSize:8,color:"#6b7280",marginBottom:4}}>Твоё уклонение</div>
+      <div style={{background:"#262219",border:"1px solid "+(waiting?"#d1d5db":shieldPhase?"#0369a140":"#10b98140"),borderRadius:10,padding:"8px 12px",marginBottom:waiting?10:0}}>
+        <div style={{fontSize:8,color:"#9a8f7c",marginBottom:4}}>Твоё уклонение</div>
         {waiting
           ?<div>
-            <div style={{fontSize:9,color:"#8b7e6a",marginBottom:8}}>d10 + DEX({fs.DEX||0}) + Dodge({es.Dodge||0})</div>
+            <div style={{fontSize:9,color:"#a89a82",marginBottom:8}}>d10 + DEX({fs.DEX||0}) + Dodge({es.Dodge||0})</div>
             <button onClick={doDodge} style={{width:"100%",padding:"10px",borderRadius:9,border:"none",background:"#10b981",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,cursor:"pointer",marginBottom:6}}>🛡️ Уклониться!</button>
             <button onClick={acceptHit} style={{width:"100%",padding:6,borderRadius:7,border:"2px solid #ef444440",background:"none",color:"#ef4444",fontWeight:700,fontSize:10,cursor:"pointer"}}>Принять удар</button>
           </div>
           :<div>
-            {dodgeDetail&&<div style={{fontSize:9,color:"#6b7280",marginBottom:4}}>{dodgeDetail}</div>}
+            {dodgeDetail&&<div style={{fontSize:9,color:"#9a8f7c",marginBottom:4}}>{dodgeDetail}</div>}
             <div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:dodged?"#10b981":"#ef4444"}}>{atk.dodgeRoll||0}</div>
             <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:dodged?"#065f46":"#991b1b",marginTop:4}}>
               {dodged?"✅ Уклонился!":shieldPhase?"❌ Попало! Выбери защиту:":"❌ Попало!"}
@@ -81,13 +81,13 @@ function PendingAttackPopup(pr){
               var canShield=shObj&&shObj.hp>0&&!is2h;
               return(<div style={{marginTop:8,display:"flex",flexDirection:"column",gap:6}}>
                 {canShield&&<button onClick={function(){update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{status:"pending_dmg",shieldUsed:true,shieldAbsorb:shObj.absorb,shieldName:shObj.name,shieldId:shObj.id});}} style={{width:"100%",padding:10,borderRadius:8,border:"none",background:"#0369a1",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13,cursor:"pointer"}}>🛡 Выставить {shObj.name} ({shObj.absorb*100}% поглощения)</button>}
-                {canShield&&<div style={{fontSize:8,color:"#8b7e6a",textAlign:"center"}}>HP щита: {shObj.hp}/{shObj.maxHp}</div>}
+                {canShield&&<div style={{fontSize:8,color:"#a89a82",textAlign:"center"}}>HP щита: {shObj.hp}/{shObj.maxHp}</div>}
                 {!canShield&&shObj&&shObj.hp<=0&&<div style={{fontSize:9,color:"#ef4444",textAlign:"center",fontWeight:700}}>💔 Щит сломан</div>}
-                {!shObj&&<div style={{fontSize:9,color:"#8b7e6a",textAlign:"center",fontStyle:"italic"}}>Нет щита</div>}
+                {!shObj&&<div style={{fontSize:9,color:"#a89a82",textAlign:"center",fontStyle:"italic"}}>Нет щита</div>}
                 <button onClick={function(){update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{status:"pending_dmg",shieldUsed:false});}} style={{width:"100%",padding:10,borderRadius:8,border:"2px solid #ef444440",background:"none",color:"#ef4444",fontWeight:700,fontSize:12,cursor:"pointer"}}>💥 Принять удар без щита</button>
               </div>);
             })()}
-            {!shieldPhase&&!dodged&&<div style={{fontSize:10,color:"#8b7e6a",marginTop:6,fontStyle:"italic"}}>ГМ наносит урон...</div>}
+            {!shieldPhase&&!dodged&&<div style={{fontSize:10,color:"#a89a82",marginTop:6,fontStyle:"italic"}}>ГМ наносит урон...</div>}
           </div>
         }
       </div>

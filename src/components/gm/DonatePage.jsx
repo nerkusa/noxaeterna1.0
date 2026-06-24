@@ -57,8 +57,8 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zInde
   <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:18,color:"#f59e0b"}}>💰 Донат-магазин</div>{isGM&&<span style={{fontSize:8,background:"#f59e0b20",color:"#f59e0b",border:"1px solid #f59e0b40",borderRadius:4,padding:"1px 6px"}}>ГМ</span>}</div>
   <div style={{display:"flex",gap:6,alignItems:"center"}}>
     {isGM&&<button onClick={function(){sEditMode(!editMode);sEditPack(null)}} style={{padding:"4px 12px",borderRadius:5,border:"2px solid #f59e0b",background:editMode?"#f59e0b":"transparent",color:editMode?"#1a1008":"#f59e0b",cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif"}}>{editMode?"✓ Готово":"✏️ Редактировать"}</button>}
-    {!isGM&&<span style={{fontSize:8,color:"#4b5563",fontStyle:"italic"}}>режим просмотра</span>}
-    <button onClick={onClose} style={{background:"none",border:"1px solid #5c5548",borderRadius:5,padding:"4px 12px",color:"#e8e0d4",cursor:"pointer",fontSize:10}}>✕ Закрыть</button>
+    {!isGM&&<span style={{fontSize:8,color:"#b8ad97",fontStyle:"italic"}}>режим просмотра</span>}
+    <button onClick={onClose} style={{background:"none",border:"1px solid #3a3429",borderRadius:5,padding:"4px 12px",color:"#e8e0d4",cursor:"pointer",fontSize:10}}>✕ Закрыть</button>
   </div>
 </div>
 
@@ -93,8 +93,8 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zInde
         <textarea style={Object.assign({},S2.inp,{minHeight:70,resize:"vertical",lineHeight:1.6})} value={eItems} onChange={function(e){sEItems(e.target.value)}} placeholder={"Пункт 1\nПункт 2\nПункт 3"}/>
       </div>
       <div style={{display:"flex",gap:5}}>
-        <button onClick={saveEdit} style={{flex:1,padding:"5px",borderRadius:5,border:"none",background:"#f59e0b",color:"#1a1008",fontWeight:700,fontSize:9,cursor:"pointer"}}>💾 Сохранить</button>
-        <button onClick={function(){sEditPack(null)}} style={{padding:"5px 10px",borderRadius:5,border:"1px solid #4b3800",background:"#1a1008",color:"#9ca3af",fontSize:9,cursor:"pointer"}}>Отмена</button>
+        <button onClick={saveEdit} style={{flex:1,padding:"5px",borderRadius:5,border:"none",background:"#f59e0b",color:"#ece5d8",fontWeight:700,fontSize:9,cursor:"pointer"}}>💾 Сохранить</button>
+        <button onClick={function(){sEditPack(null)}} style={{padding:"5px 10px",borderRadius:5,border:"1px solid #4b3800",background:"#1a1008",color:"#8d8270",fontSize:9,cursor:"pointer"}}>Отмена</button>
         <button onClick={function(){if(window.confirm("Удалить "+p.name+"?"))deletePack(p.id)}} style={{padding:"5px 8px",borderRadius:5,border:"1px solid #ef444440",background:"#1a1008",color:"#ef4444",fontSize:9,cursor:"pointer"}}>🗑️</button>
       </div>
     </div>:
@@ -124,22 +124,22 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zInde
 <div style={{background:"#1a1008",border:"1px solid #4b3800",borderRadius:12,padding:"14px",marginBottom:14,textAlign:"center"}}>
   <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:"#f59e0b",marginBottom:10}}>💳 Оплата</div>
   {qrImg?<div style={{position:"relative",display:"inline-block"}}>
-    <img src={qrImg} style={{width:180,height:180,borderRadius:8,objectFit:"contain",background:"#fff",padding:6,display:"block"}} alt="QR"/>
+    <img src={qrImg} style={{width:180,height:180,borderRadius:8,objectFit:"contain",background:"#262219",padding:6,display:"block"}} alt="QR"/>
     {isGM&&editMode&&<label style={{position:"absolute",bottom:4,right:4,background:"rgba(0,0,0,0.85)",border:"1px solid #f59e0b",borderRadius:5,padding:"3px 8px",color:"#f59e0b",cursor:"pointer",fontSize:8}}>🔄 QR<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("qr",ev.target.result)};r.readAsDataURL(f)}}/></label>}
   </div>:
   <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
     <div style={{width:140,height:140,background:"#111",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",border:"2px dashed #4b3800"}}>
-      {isGM&&editMode?<label style={{cursor:"pointer",textAlign:"center",padding:10}}><div style={{fontSize:28}}>📷</div><div style={{fontSize:8,color:"#f59e0b",marginTop:4}}>Загрузить QR-код</div><input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("qr",ev.target.result)};r.readAsDataURL(f)}}/></label>:<div style={{textAlign:"center"}}><div style={{fontSize:32}}>📱</div><div style={{fontSize:8,color:"#4b5563",marginTop:4}}>QR появится здесь</div></div>}
+      {isGM&&editMode?<label style={{cursor:"pointer",textAlign:"center",padding:10}}><div style={{fontSize:28}}>📷</div><div style={{fontSize:8,color:"#f59e0b",marginTop:4}}>Загрузить QR-код</div><input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("qr",ev.target.result)};r.readAsDataURL(f)}}/></label>:<div style={{textAlign:"center"}}><div style={{fontSize:32}}>📱</div><div style={{fontSize:8,color:"#b8ad97",marginTop:4}}>QR появится здесь</div></div>}
     </div>
   </div>}
 </div>
 
 {/* Conditions */}
 <div style={{background:"#0d0d0d",border:"1px solid #1f2937",borderRadius:10,padding:"12px 14px",marginBottom:8}}>
-  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:9,color:"#6b7280",marginBottom:8}}>📜 Условия использования</div>
-  {CONDITIONS.map(function(c,i){return<div key={i} style={{fontSize:8,color:"#4b5563",lineHeight:1.7}}>⚠️ {c}</div>})}
+  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:9,color:"#9a8f7c",marginBottom:8}}>📜 Условия использования</div>
+  {CONDITIONS.map(function(c,i){return<div key={i} style={{fontSize:8,color:"#b8ad97",lineHeight:1.7}}>⚠️ {c}</div>})}
 </div>
-<div style={{textAlign:"center",fontSize:8,color:"#1f2937",marginTop:8}}>Nox Aeterna © Здоровье не продаётся. Хотя...</div>
+<div style={{textAlign:"center",fontSize:8,color:"#ece5d8",marginTop:8}}>Nox Aeterna © Здоровье не продаётся. Хотя...</div>
 </div>
 </div>)}
 

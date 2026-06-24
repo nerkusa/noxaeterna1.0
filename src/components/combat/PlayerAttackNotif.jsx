@@ -41,19 +41,19 @@ function PlayerAttackNotif(pr){
     }
     function skipNpcDmg(){remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+dmgId));}
     return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:998,animation:"fadeIn 0.2s"}}>
-      <div style={{background:"#fefcf5",border:"3px solid "+(dodgedNpc?"#10b981":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
-        <div style={{display:"flex",justifyContent:"flex-end",marginBottom:2}}><button onClick={skipNpcDmg} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"#8b7e6a"}}>✕</button></div>
+      <div style={{background:"#221e17",border:"3px solid "+(dodgedNpc?"#10b981":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
+        <div style={{display:"flex",justifyContent:"flex-end",marginBottom:2}}><button onClick={skipNpcDmg} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"#a89a82"}}>✕</button></div>
         <div style={{fontSize:24,marginBottom:4}}>{dodgedNpc?"🛡️":"💥"}</div>
         <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,color:dodgedNpc?"#065f46":"#dc2626",marginBottom:8}}>{dmgAtk.attackerName+" vs "+dmgAtk.npcName}</div>
         <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:10}}>
-          <div style={{textAlign:"center",background:"#fef2f2",borderRadius:8,padding:"6px 14px"}}><div style={{fontSize:8,color:"#6b7280",marginBottom:1}}>Атака</div><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:26,color:"#ef4444"}}>{dmgAtk.hitRoll}</div></div>
-          <div style={{fontSize:15,color:"#8b7e6a",fontWeight:700,alignSelf:"center"}}>vs</div>
-          <div style={{textAlign:"center",background:"#f0fdf4",borderRadius:8,padding:"6px 14px"}}><div style={{fontSize:8,color:"#6b7280",marginBottom:1}}>Уклонение</div><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:26,color:"#10b981"}}>{dmgAtk.dodgeRoll||0}</div></div>
+          <div style={{textAlign:"center",background:"#2a1414",borderRadius:8,padding:"6px 14px"}}><div style={{fontSize:8,color:"#9a8f7c",marginBottom:1}}>Атака</div><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:26,color:"#ef4444"}}>{dmgAtk.hitRoll}</div></div>
+          <div style={{fontSize:15,color:"#a89a82",fontWeight:700,alignSelf:"center"}}>vs</div>
+          <div style={{textAlign:"center",background:"#0e2018",borderRadius:8,padding:"6px 14px"}}><div style={{fontSize:8,color:"#9a8f7c",marginBottom:1}}>Уклонение</div><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:26,color:"#10b981"}}>{dmgAtk.dodgeRoll||0}</div></div>
         </div>
         <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:dodgedNpc?"#065f46":"#991b1b",marginBottom:10}}>{dodgedNpc?"✅ NPC уклонился!":"❌ Попало!"}</div>
         {dodgedNpc
           ?<button onClick={skipNpcDmg} style={{width:"100%",padding:8,borderRadius:8,border:"none",background:"#10b981",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13,cursor:"pointer"}}>✅ Закрыть</button>
-          :<div style={{marginTop:4,padding:"8px",background:"#fef2f2",borderRadius:8,fontSize:10,color:"#8b7e6a",fontStyle:"italic",textAlign:"center"}}>⚔️ Игрок бросает урон...</div>
+          :<div style={{marginTop:4,padding:"8px",background:"#2a1414",borderRadius:8,fontSize:10,color:"#a89a82",fontStyle:"italic",textAlign:"center"}}>⚔️ Игрок бросает урон...</div>
         }
       </div>
     </div>);
@@ -76,33 +76,33 @@ function PlayerAttackNotif(pr){
   var atkD2=atk.atkD||"?";var atkREF2=atk.atkREF||0;var atkSkill2=atk.atkSkill||0;var atkBonus2=atk.atkBonus||0;var atkSkillName2=atk.atkSkillName||"Навык";
   var npcDex=npc?(npc.stats||{}).DEX||0:0;var npcDodge=npc?(npc.skills||{}).dodge||0:0;
   return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:998,animation:"fadeIn 0.2s"}}>
-    <div style={{background:"#fefcf5",border:"3px solid #3b82f6",borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
-      <div style={{display:"flex",justifyContent:"flex-end",marginBottom:2}}><button onClick={acceptHit} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"#8b7e6a",lineHeight:1}}>✕</button></div>
-      {needDodge.length>1&&<div style={{fontSize:9,color:"#8b7e6a",marginBottom:4}}>{"Атака 1 из "+needDodge.length}</div>}
+    <div style={{background:"#221e17",border:"3px solid #3b82f6",borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
+      <div style={{display:"flex",justifyContent:"flex-end",marginBottom:2}}><button onClick={acceptHit} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"#a89a82",lineHeight:1}}>✕</button></div>
+      {needDodge.length>1&&<div style={{fontSize:9,color:"#a89a82",marginBottom:4}}>{"Атака 1 из "+needDodge.length}</div>}
       <div style={{fontSize:24,marginBottom:4}}>🎯</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#1d4ed8",marginBottom:8}}>{atk.attackerName+" атакует "+atk.npcName+"!"}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#60a5fa",marginBottom:8}}>{atk.attackerName+" атакует "+atk.npcName+"!"}</div>
       {/* Бросок атаки с деталями */}
-      <div style={{background:"#fff",border:"1px solid #e8e0d4",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
-        <div style={{fontSize:8,color:"#6b7280",marginBottom:4}}>Бросок на попадание</div>
+      <div style={{background:"#262219",border:"1px solid #322d24",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
+        <div style={{fontSize:8,color:"#9a8f7c",marginBottom:4}}>Бросок на попадание</div>
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,flexWrap:"wrap",marginBottom:6}}>
           <span style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:900,color:atkD2===10?"#d97706":atkD2===1?"#dc2626":"#3b82f6"}}>{"🎲"+atkD2}</span>
-          <span style={{color:"#8b7e6a"}}>+</span>
-          <span style={{background:"#f5f0e8",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#8b7e6a",fontSize:7,display:"block"}}>REF</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkREF2}</span></span>
-          <span style={{color:"#8b7e6a"}}>+</span>
-          <span style={{background:"#f5f0e8",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#8b7e6a",fontSize:7,display:"block"}}>{atkSkillName2}</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkSkill2}</span></span>
-          {atkBonus2!==0&&<span style={{color:"#8b7e6a"}}>+</span>}
-          {atkBonus2!==0&&<span style={{background:"#f5f0e8",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#8b7e6a",fontSize:7,display:"block"}}>Бнс</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkBonus2}</span></span>}
+          <span style={{color:"#a89a82"}}>+</span>
+          <span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>REF</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkREF2}</span></span>
+          <span style={{color:"#a89a82"}}>+</span>
+          <span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>{atkSkillName2}</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkSkill2}</span></span>
+          {atkBonus2!==0&&<span style={{color:"#a89a82"}}>+</span>}
+          {atkBonus2!==0&&<span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>Бнс</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkBonus2}</span></span>}
         </div>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:"#1d4ed8"}}>{"= "+atk.hitRoll}</div>
-        <div style={{fontSize:9,color:"#8b7e6a",marginTop:2}}>{(atk.weaponName||"")+(atk.dmgType?" · "+atk.dmgType:"")}</div>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:"#60a5fa"}}>{"= "+atk.hitRoll}</div>
+        <div style={{fontSize:9,color:"#a89a82",marginTop:2}}>{(atk.weaponName||"")+(atk.dmgType?" · "+atk.dmgType:"")}</div>
       </div>
       {/* Уклонение NPC */}
-      <div style={{background:"#fff",border:"1px solid #e8e0d4",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
-        <div style={{fontSize:8,color:"#6b7280",marginBottom:4}}>Уклонение {atk.npcName}</div>
-        <div style={{fontSize:9,color:"#8b7e6a",marginBottom:6}}>d10 + DEX({npcDex}) + Dodge({npcDodge})</div>
+      <div style={{background:"#262219",border:"1px solid #322d24",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
+        <div style={{fontSize:8,color:"#9a8f7c",marginBottom:4}}>Уклонение {atk.npcName}</div>
+        <div style={{fontSize:9,color:"#a89a82",marginBottom:6}}>d10 + DEX({npcDex}) + Dodge({npcDodge})</div>
         <button onClick={doDodge} style={{width:"100%",padding:"10px",borderRadius:9,border:"none",background:"#10b981",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,cursor:"pointer"}}>🛡️ Бросить уклонение!</button>
       </div>
-      <button onClick={acceptHit} style={{width:"100%",padding:6,borderRadius:7,border:"2px solid #3b82f640",background:"none",color:"#8b7e6a",fontWeight:700,fontSize:10,cursor:"pointer"}}>Принять удар без уклонения</button>
+      <button onClick={acceptHit} style={{width:"100%",padding:6,borderRadius:7,border:"2px solid #3b82f640",background:"none",color:"#a89a82",fontWeight:700,fontSize:10,cursor:"pointer"}}>Принять удар без уклонения</button>
     </div>
   </div>)}
 

@@ -18,9 +18,9 @@ function DamagePopup(pr){
           <span style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:28,color:dead?"#374151":"#dc2626"}}>{ev.newHp}</span>
           <span style={{fontSize:10,color:dead?"#6b7280":"#8b7e6a"}}>{"/ "+ev.maxHp}</span>
         </div>
-        {!dead&&<div style={{marginTop:6,background:"#f0f0f0",borderRadius:4,height:8,overflow:"hidden"}}><div style={{height:"100%",width:pct+"%",background:pct<=25?"#dc2626":pct<=50?"#f59e0b":"#10b981",borderRadius:4,transition:"width 0.5s"}}/></div>}
+        {!dead&&<div style={{marginTop:6,background:"#262219",borderRadius:4,height:8,overflow:"hidden"}}><div style={{height:"100%",width:pct+"%",background:pct<=25?"#dc2626":pct<=50?"#f59e0b":"#10b981",borderRadius:4,transition:"width 0.5s"}}/></div>}
       </div>
-      {dead&&<div style={{fontSize:10,color:"#9ca3af",marginBottom:10}}>Персонаж потерял сознание или погиб</div>}
+      {dead&&<div style={{fontSize:10,color:"#8d8270",marginBottom:10}}>Персонаж потерял сознание или погиб</div>}
       <button onClick={pr.onClose} style={{width:"100%",padding:8,borderRadius:8,border:"none",background:dead?"#374151":"#ef4444",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,cursor:"pointer"}}>OK</button>
     </div>
   </div>)}
