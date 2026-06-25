@@ -2,7 +2,7 @@ import React from 'react';
 import { db, ref, update, remove } from '../../firebase';
 import { ZONES } from '../../data/combat';
 import { calcAE } from '../../utils/combat';
-import { r1, rN, sm } from '../../utils/dice';
+import { r1, rN, sm, rollHit } from '../../utils/dice';
 import DamagePopup from './DamagePopup';
 import PlayerAttackStatus from './PlayerAttackStatus';
 
@@ -64,7 +64,7 @@ function PlayerAttackNotif(pr){
   function doDodge(){
     if(!npc)return;
     var st=npc.stats||{};var sk=npc.skills||{};
-    var d=r1(10);var dv=st.DEX||0;var dg=sk.dodge||0;var t=d+dv+dg;
+    var R=rollHit();var d=R.d;var dv=st.DEX||0;var dg=sk.dodge||0;var t=d+dv+dg;
     var dodged=t>=atk.hitRoll;
     update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:t,status:dodged?"done":"pending_dmg",dodgeDetail:"d10("+d+")+DEX("+dv+")+Dodge("+dg+")="+t});
     addLog({who:npc.name,type:"dodge",label:(dodged?"✅ Уклонился от ":"❌ Не уклонился от ")+atk.attackerName,detail:"d10("+d+")+DEX("+dv+")+Dodge("+dg+") = "+t+" vs "+atk.hitRoll,total:t});

@@ -6,10 +6,11 @@ import { DT, WS, WT } from '../../data/stats';
 import { S } from '../../styles/ui';
 import { cF, mHP } from '../../utils/character';
 import { applyDmgToNpc } from '../../utils/combat';
-import { pk, r1, rN, sm, uid } from '../../utils/dice';
+import { pk, r1, rN, sm, uid, rollHit } from '../../utils/dice';
 import ArmorSection from './ArmorSection';
 import InvTab from './InvTab';
 import ShopPicker from '../ShopPicker';
+import InitiativeBar from '../combat/InitiativeBar';
 
 function CombatTab(pr){
 var c=pr.char;var sv=pr.save;var oR=pr.onRoll;var inf=cF(c);var fs=inf.fs;var es=inf.eSk;
@@ -42,7 +43,7 @@ var hpP=mx>0?(curHp/mx)*100:0;
 var isGM=pr.isGM;
 var visibleLogs=(pr.logs||[]).filter(function(l){return isGM||(l.type!=="dmg_npc"&&l.type!=="spawn")});
 return(<div style={{display:"flex",flexDirection:"column",gap:8}}>
-
+{pr.initiative&&<InitiativeBar initiative={pr.initiative}/>}
 <div style={{background:"#2a1414",border:"2px solid #ef444418",borderRadius:9,padding:"7px 9px"}}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11}}>❤️ HP</span><div style={{display:"flex",alignItems:"center",gap:3}}><span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#ef4444"}}>{curHp}</span><span style={{color:"#a89a82"}}>/</span><span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14}}>{mx}</span></div></div>
 <div style={{background:"#262219",borderRadius:4,height:10,overflow:"hidden"}}><div style={{height:"100%",width:hpP+"%",background:"#ef4444",borderRadius:4,transition:"width 0.3s"}}/></div>
@@ -108,7 +109,7 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 
 <div style={{display:"flex",gap:3}}>
 <button onClick={function(){var d=r1(6);var z=ZONES[d-1];sZone(z.name);pr.addLog({who:c.name||"???",type:"zone",label:z.e+" "+z.name+" ×"+z.mult,detail:"1d6="+d,total:d});oR({label:"🎯 Зона",d10:d,parts:[],total:d,subtext:z.e+" "+z.name+" ×"+z.mult+(z.ignoreArmor?" (игнор брони)":"")})}} style={{flex:1,padding:7,borderRadius:7,border:"2px solid #f59e0b28",background:"#231b08",cursor:"pointer",fontWeight:700,fontSize:10,color:"#f0b352"}}>🎯 Зона</button>
-<button onClick={function(){var d=r1(10);var dv=fs.DEX||0;var dg=es.Dodge||0;var t=d+dv+dg;pr.addLog({who:c.name||"???",type:"dodge",label:"🛡️ Уклонение",detail:"🎲"+d+" + DEX("+dv+") + Dodge("+dg+") = "+t,total:t});oR({label:"🛡️ Уклонение",d10:d,parts:[{label:"DEX",value:dv},{label:"Dodge",value:dg}],total:t})}} style={{flex:1,padding:7,borderRadius:7,border:"2px solid #10b98128",background:"#0e2018",cursor:"pointer",fontWeight:700,fontSize:10,color:"#34d399"}}>🛡️ Уклон.</button>
+<button onClick={function(){var R=rollHit();var d=R.d;var dv=fs.DEX||0;var dg=es.Dodge||0;var t=d+dv+dg;pr.addLog({who:c.name||"???",type:"dodge",label:"🛡️ Уклонение"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + DEX("+dv+") + Dodge("+dg+") = "+t,total:t});oR({label:"🛡️ Уклонение",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"DEX",value:dv},{label:"Dodge",value:dg}],total:t})}} style={{flex:1,padding:7,borderRadius:7,border:"2px solid #10b98128",background:"#0e2018",cursor:"pointer",fontWeight:700,fontSize:10,color:"#34d399"}}>🛡️ Уклон.</button>
 </div>
 
 {/* Чувствительный */}
@@ -185,9 +186,9 @@ return(<div key={w.id} style={{background:isEq?"#0e2018":"#1d1a14",border:"1px s
 <button onClick={function(){var upd={weaponMode:"2h"};if(c.equippedShield)upd.equippedShield=null;sv(Object.assign({},c,upd));}} style={{flex:1,padding:"2px 0",borderRadius:4,border:curMode==="2h"?"2px solid #3b82f6":"1px solid #322d24",background:curMode==="2h"?"#0e1a2b":"#1d1a14",fontSize:8,fontWeight:curMode==="2h"?700:400,cursor:"pointer",color:curMode==="2h"?"#60a5fa":"#b3a890"}}>2 руки · {w.dmgDice2h||w.dmgDice}{w.bonus2h!==undefined?" +"+w.bonus2h:""}</button>
 </div>}
 <div style={{display:"flex",gap:3}}>
-<button onClick={function(){var d=r1(10);var rv=fs.REF||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&pf.id==="warrior")?5:0;if(warBon)sv(Object.assign({},c,{warriorBonus:false}));var t=d+rv+sv2+(w.bonus||0)+warBon;pr.addLog({who:c.name||"???",type:"hit",label:"🎯 "+w.name+(tgtNpc?" → "+tgtNpc.name:"")+(warBon?" ⚔️+5":""),detail:"🎲"+d+" + REF("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+") = "+t,total:t});
+<button onClick={function(){var R=rollHit();var d=R.d;var rv=fs.REF||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&pf.id==="warrior")?5:0;if(warBon)sv(Object.assign({},c,{warriorBonus:false}));var t=d+rv+sv2+(w.bonus||0)+warBon;pr.addLog({who:c.name||"???",type:"hit",label:"🎯 "+w.name+(tgtNpc?" → "+tgtNpc.name:"")+(warBon?" ⚔️+5":"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + REF("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+") = "+t,total:t});
 if(tgtNpc&&tgtId&&pr.savePendingAttack){pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:t,atkD:d,atkREF:rv,atkSkill:sv2,atkSkillName:sk,atkBonus:w.bonus||0,weaponName:w.name,dmgDice:activeDice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:activeBon,zone:selZone,status:"pending_dodge",ts:Date.now()});}
-else{oR({label:w.name+" Попад.",d10:d,parts:[{label:"REF",value:rv},{label:sk,value:sv2},{label:"Бнс",value:w.bonus||0}],total:t});}}}
+else{oR({label:w.name+" Попад.",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"REF",value:rv},{label:sk,value:sv2},{label:"Бнс",value:w.bonus||0}],total:t});}}}
  style={{flex:1,padding:4,borderRadius:5,border:"1px solid #3b82f620",background:"#0e1a2b",cursor:"pointer",fontWeight:700,fontSize:9,color:"#60a5fa",textAlign:"center"}}>{"🎯"+(tgtNpc?" →"+tgtNpc.name.slice(0,8):"")}</button>
 <button onClick={function(){
   var m=activeDice.match(/(\d+)d(\d+)/);if(!m)return;
