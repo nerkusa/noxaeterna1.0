@@ -21,7 +21,7 @@ var eqShield=shields.find(function(s){return s.id===c.equippedShield});
 var equippedW=(c.weapons||[]).find(function(w){return w.id===c.equippedWeapon});
 var shieldBlocked=equippedW&&(equippedW.hands===2||(equippedW.hands===1.5&&(c.weaponMode||"1h")==="2h"));
 return <div style={{background:"#262219",border:"2px solid #64748b18",borderRadius:9,padding:"7px 8px"}}>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><label style={S.lb}>🛡️ Броня</label><button onClick={function(){sSAA(!saa)}} style={{fontSize:8,background:"none",border:"none",cursor:"pointer",color:"#10b981",fontWeight:700}}>{saa?"✕":"+ Броня"}</button></div>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><label style={S.lb}>🛡️ Броня</label><button onClick={function(){sSAA(!saa)}} style={{fontSize:9,background:"#0e2018",border:"1px solid #10b98140",borderRadius:5,padding:"2px 8px",cursor:"pointer",color:"#34d399",fontWeight:700}}>{saa?"✕ Закрыть":"➕ Добавить броню"}</button></div>
 {/* Слот щита — как инвентарь */}
 <div style={{marginBottom:6,padding:"5px 7px",background:"#0e1a2b",border:"1px solid #38bdf828",borderRadius:7}}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
