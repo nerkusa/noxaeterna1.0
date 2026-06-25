@@ -24,8 +24,8 @@ return(<div style={{flex:1,display:"flex",flexDirection:"column"}}><RollPopup ro
 <div style={{display:"flex",gap:1,padding:"2px 2px 0",background:"#262219",borderBottom:"1px solid #322d24"}}>{tabs.map(function(t){return <button key={t.id} onClick={function(){sT(t.id)}} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1,padding:"4px 1px",border:"none",borderRadius:"6px 6px 0 0",cursor:"pointer",fontFamily:"'Nunito',sans-serif",background:tab===t.id?"#2c2820":"transparent",color:tab===t.id?"#cbb990":"#a89a82",fontWeight:tab===t.id?700:500,fontSize:8}}>{t.ic}<span>{t.l}</span></button>})}</div>
 <div style={{flex:1,padding:8,overflowY:"auto"}}>
 {tab==="character"&&<CharTab char={c} save={pr.save} onRoll={sRP} isGM={pr.isGM} addLog={pr.addLog}/>}
-{tab==="combat"&&<CombatTab char={c} save={pr.save} logs={pr.logs} addLog={pr.addLog} onRoll={sRP} spawned={pr.spawned} saveSpawned={pr.saveSpawned} characters={pr.characters} isGM={pr.isGM} onDmgEvent={sDmgEv} onNpcDeath={sNpcDeathEv} savePendingAttack={pr.savePendingAttack} room={pr.room} saveNpcHit={pr.saveNpcHit}/>}
-{tab==="inventory"&&<InvTab char={c} save={pr.save}/>}
+{tab==="combat"&&<CombatTab char={c} save={pr.save} logs={pr.logs} addLog={pr.addLog} onRoll={sRP} spawned={pr.spawned} saveSpawned={pr.saveSpawned} characters={pr.characters} isGM={pr.isGM} onDmgEvent={sDmgEv} onNpcDeath={sNpcDeathEv} savePendingAttack={pr.savePendingAttack} room={pr.room} saveNpcHit={pr.saveNpcHit} shop={pr.shop}/>}
+{tab==="inventory"&&<InvTab char={c} save={pr.save} shop={pr.shop}/>}
 {tab==="library"&&<LibTab lore={pr.lore} mapData={pr.mapData} saveMap={pr.saveMap} characters={pr.characters} isGM={pr.isGM} charId={c._fbId}/>}
 {tab==="guide"&&<CheatTab/>}
 </div></div>)}

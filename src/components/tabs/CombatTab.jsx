@@ -9,6 +9,7 @@ import { applyDmgToNpc } from '../../utils/combat';
 import { pk, r1, rN, sm } from '../../utils/dice';
 import ArmorSection from './ArmorSection';
 import InvTab from './InvTab';
+import ShopPicker from '../ShopPicker';
 
 function CombatTab(pr){
 var c=pr.char;var sv=pr.save;var oR=pr.onRoll;var inf=cF(c);var fs=inf.fs;var es=inf.eSk;
@@ -57,7 +58,7 @@ return(<div style={{display:"flex",flexDirection:"column",gap:8}}>
 </div>
 
 {/* Броня игрока */}
-<ArmorSection char={c} save={sv} finalStats={fs}/>
+<ArmorSection char={c} save={sv} finalStats={fs} shop={pr.shop}/>
 
 {/* NPC цели — видны всем игрокам */}
 {spawnedArr.length>0&&<div style={{border:"2px solid #ef444428",borderRadius:9,padding:"6px 8px",background:"#2a1414"}}>
@@ -153,7 +154,8 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 
 {/* Оружие */}
 <div style={{background:"#262219",border:"2px solid #f59e0b18",borderRadius:9,padding:"7px 8px"}}>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><label style={S.lb}>⚔️ Оружие</label><button onClick={function(){sSA(!sa)}} style={{fontSize:8,background:"none",border:"none",cursor:"pointer",color:"#f0b352",fontWeight:700}}>{sa?"✕":"+ Оружие"}</button></div>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><label style={S.lb}>⚔️ Оружие</label><button onClick={function(){sSA(!sa)}} style={{fontSize:9,background:"#0e1a2b",border:"1px solid #3b82f640",borderRadius:5,padding:"2px 8px",cursor:"pointer",color:"#60a5fa",fontWeight:700}}>{sa?"✕ Закрыть":"➕ Своё оружие"}</button></div>
+<ShopPicker color="#3b82f6" items={(pr.shop||[]).filter(function(i){return i.cat==="weapon"})} sub={function(it){var h=it.hands===2?"двуруч.":it.hands===1.5?"полуторн.":"одноруч.";return it.wtype+" · "+it.dmgDice+(it.bonus?"+"+it.bonus:"")+" · "+it.dmgType+" · "+h}} onPick={function(it){var newW={id:Date.now(),name:it.name,type:it.wtype,dmgType:it.dmgType,bonus:it.bonus||0,dmgDice:it.dmgDice,hands:it.hands};if(it.hands===1.5){newW.dmgDice2h=it.dmgDice2h;newW.bonus2h=it.bonus2h||0;}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([newW])}))}}/>
 {sa&&<div style={{background:"#262219",border:"1px solid #322d24",borderRadius:8,padding:6,marginBottom:4,display:"flex",flexDirection:"column",gap:3}}>
 <input style={S.inp} value={wn} onChange={function(e){sWN(e.target.value)}} placeholder="Название"/>
 <div style={{display:"flex",gap:3}}>
