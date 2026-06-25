@@ -1,7 +1,7 @@
 import React from 'react';
 import { db, ref, update, remove } from '../../firebase';
 import { cF } from '../../utils/character';
-import { r1 } from '../../utils/dice';
+import { r1, rollHit } from '../../utils/dice';
 import GMAttackPanel from './GMAttackPanel';
 
 function PendingAttackPopup(pr){
@@ -20,7 +20,7 @@ function PendingAttackPopup(pr){
   var atkBonus=atk.atkBonus||0;var atkSkillName=atk.atkSkillName||"Навык";
   var dodgeDetail=atk.dodgeDetail||"";
   function doDodge(){
-    var d=r1(10);var dv=fs.DEX||0;var dg=es.Dodge||0;var t=d+dv+dg;
+    var R=rollHit();var d=R.d;var dv=fs.DEX||0;var dg=es.Dodge||0;var t=d+dv+dg;
     var dodgedNow=t>=atk.hitRoll;
     if(dodgedNow){
       /* Уклонился — ставим статус "dodged", ГМ видит результат с кнопкой Закрыть */

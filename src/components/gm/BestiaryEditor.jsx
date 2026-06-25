@@ -5,10 +5,11 @@ import { DT, SD, WT } from '../../data/stats';
 import { S } from '../../styles/ui';
 import { cF, mHP } from '../../utils/character';
 import { calcAE } from '../../utils/combat';
-import { r1, rN, sm, uid } from '../../utils/dice';
+import { r1, rN, sm, uid, rollHit } from '../../utils/dice';
 import GMAttackPanel from '../combat/GMAttackPanel';
 import PlayerAttackNotif from '../combat/PlayerAttackNotif';
 import RollPopup from '../combat/RollPopup';
+import InitiativeBar from '../combat/InitiativeBar';
 
 function BestiaryEditor(pr){
 var templ=pr.npcTempl||{};var spawned=pr.spawned||{};
@@ -42,6 +43,17 @@ function addTmpWeapon(){if(!twn.trim())return;sNWeapons(nweapons.concat([{id:uid
 function spawnNpc(cat,id){var t=templ[cat]&&templ[cat][id];if(!t)return;var sp=Object.assign({},spawned);var sid="s_"+Date.now();sp[sid]=Object.assign({},t,{_catId:cat,_tmplId:id,spawnedAt:Date.now()});pr.saveSpawned(sp);pr.addLog({who:"ГМ",type:"spawn",label:"👹 "+t.name+" появился!",detail:"",total:0})}
 function despawn(id){var sp=Object.assign({},spawned);delete sp[id];pr.saveSpawned(sp)}
 function updateSpawned(id,data){var sp=Object.assign({},spawned);sp[id]=data;pr.saveSpawned(sp)}
+function rollInitiative(){
+  var list=[];
+  playerChars.forEach(function(pc){var inf=cF(pc);var rv=inf.fs.REF||0;var R=rollHit();list.push({id:pc._fbId,name:pc.name||"?",kind:"player",init:R.d+rv})});
+  Object.entries(spawned).forEach(function(e){var id=e[0];var s=e[1];var hp=s.hp!==undefined?s.hp:s.maxHp;if(hp<=0)return;var rv=(s.stats||{}).REF||0;var R=rollHit();list.push({id:id,name:s.name,kind:"npc",init:R.d+rv})});
+  if(!list.length)return;
+  list.sort(function(a,b){return b.init-a.init});
+  if(pr.saveInitiative)pr.saveInitiative({list:list,turn:0,round:1});
+  pr.addLog({who:"ГМ",type:"spawn",label:"⚔️ Инициатива брошена",detail:list.map(function(x){return x.name+":"+x.init}).join(", "),total:0});
+}
+function nextTurn(){var init=pr.initiative;if(!init||!init.list||!init.list.length)return;var n=(init.turn||0)+1;var round=init.round||1;if(n>=init.list.length){n=0;round++}if(pr.saveInitiative)pr.saveInitiative(Object.assign({},init,{turn:n,round:round}))}
+function endCombat(){if(pr.saveInitiative)pr.saveInitiative(null)}
 
 /* Применить урон к игроку (с учётом брони и зоны) */
 function applyDmgToPlayer(ptgt,rawDmg,dmgType,zoneName,who){
@@ -73,12 +85,12 @@ function npcAttack(s,w){
   var rv,skVal,skNm,atName;
   if(w.magic){rv=st.WILL||0;skVal=sk.spellcast||0;skNm="Spellcast";atName="WILL";}
   else{var skMap={Battle:"battleWeapon",Simple:"simpleWeapon",Guns:"guns",Archery:"archery"};skVal=sk[skMap[w.type]]||0;rv=st.REF||0;skNm=w.type;atName="REF";}
-  var d=r1(10);var t=d+rv+skVal+(w.bonus||0);
+  var R=rollHit();var d=R.d;var t=d+rv+skVal+(w.bonus||0);
   var tgtChar=playerTgtId?playerChars.find(function(x){return x._fbId===playerTgtId}):null;
   var tgtName=tgtChar?tgtChar.name:"";
-  pr.addLog({who:s.name,type:"hit",label:(w.magic?"🔮 ":"🎯 ")+w.name+(tgtName?" → "+tgtName:""),detail:"🎲"+d+" + "+atName+"("+rv+") + "+skNm+"("+skVal+") + бонус("+(w.bonus||0)+") = "+t,total:t});
+  pr.addLog({who:s.name,type:"hit",label:(w.magic?"🔮 ":"🎯 ")+w.name+(tgtName?" → "+tgtName:"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + "+atName+"("+rv+") + "+skNm+"("+skVal+") + бонус("+(w.bonus||0)+") = "+t,total:t});
   /* RollPopup не показываем — результат отображается в GMAttackPanel */
-  if(!playerTgtId){sRollP({label:s.name+" — "+w.name+" Попад.",d10:d,parts:[{label:atName,value:rv},{label:skNm,value:skVal},{label:"Бнс",value:w.bonus||0}],total:t,subtext:"(нет цели)"});}
+  if(!playerTgtId){sRollP({label:s.name+" — "+w.name+" Попад.",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:atName,value:rv},{label:skNm,value:skVal},{label:"Бнс",value:w.bonus||0}],total:t,subtext:"(нет цели)"});}
   if(playerTgtId&&pr.savePendingAttack){
     pr.savePendingAttack({id:"atk_"+Date.now(),attackerName:s.name,targetId:playerTgtId,targetName:tgtName,
       hitRoll:t,atkD:d,atkREF:rv,atkSkill:skVal,atkSkillName:skNm,atkBonus:w.bonus||0,
@@ -135,6 +147,16 @@ return(<div style={{flex:1,display:"flex",flexDirection:"column"}}>
 <div style={{padding:"8px 10px",borderBottom:"2px solid #ef444428",background:"#2a1414",display:"flex",alignItems:"center",gap:6}}><button onClick={pr.onBack} style={{background:"none",border:"none",fontSize:14,cursor:"pointer",color:"#a89a82"}}>←</button><span style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,color:"#ef4444"}}>👹 Бестиарий</span></div>
 <div style={{flex:1,padding:8,overflowY:"auto",display:"flex",flexDirection:"column",gap:6}}>
 
+{/* Инициатива / порядок ходов */}
+<div style={{display:"flex",flexDirection:"column",gap:5}}>
+{pr.initiative?<InitiativeBar initiative={pr.initiative}/>:<div style={{fontSize:9,color:"#a89a82",fontStyle:"italic",border:"2px dashed #f59e0b30",borderRadius:9,padding:"6px 8px",background:"#231b08"}}>⚔️ Бой не начат. Отметь игроков «В игру», заспавни NPC и брось инициативу.</div>}
+<div style={{display:"flex",gap:3}}>
+{!pr.initiative&&<button onClick={rollInitiative} style={{flex:1,padding:"5px",borderRadius:6,border:"2px solid #f59e0b40",background:"#2a2008",color:"#f0b352",fontWeight:700,fontSize:10,cursor:"pointer"}}>🎲 Бросить инициативу</button>}
+{pr.initiative&&<button onClick={nextTurn} style={{flex:1,padding:"5px",borderRadius:6,border:"none",background:"#f59e0b",color:"#1a1410",fontWeight:700,fontSize:10,cursor:"pointer"}}>▶ Следующий ход</button>}
+{pr.initiative&&<button onClick={rollInitiative} title="Перебросить" style={{padding:"5px 8px",borderRadius:6,border:"1px solid #322d24",background:"#1d1a14",color:"#a89a82",fontSize:10,cursor:"pointer"}}>🔄</button>}
+{pr.initiative&&<button onClick={endCombat} title="Завершить бой" style={{padding:"5px 8px",borderRadius:6,border:"1px solid #ef444430",background:"#2a1414",color:"#ef4444",fontSize:10,cursor:"pointer"}}>⏹ Конец</button>}
+</div>
+</div>
 {/* Выбор цели для атак NPC по игрокам */}
 {<div style={{border:"2px solid #3b82f628",borderRadius:9,padding:"6px 8px",background:"#0e1a2b"}}>
 <label style={Object.assign({},S.lb,{color:"#60a5fa"})}>🎯 Цель NPC-атак (игрок)</label>
@@ -170,9 +192,9 @@ return <div key={id} style={{background:"#262219",border:"1px solid #322d24",bor
 <button onClick={function(){npcAttack(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid "+(w.magic?"#7c3aed40":"#3b82f620"),background:w.magic?"#1f1330":"#0e1a2b",fontSize:7,fontWeight:700,color:w.magic?"#a78bfa":"#60a5fa",cursor:"pointer"}}>{(w.magic?"🔮 ":"🎯 ")+w.name+(playerTgtId?" →":"")}</button>
 <button onClick={function(){npcDmg(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #ef444420",background:"#2a1414",fontSize:7,fontWeight:700,color:"#dc2626",cursor:"pointer"}}>{"💥"+(playerTgtId?" →":"")}</button>
 </div>}):
-<button onClick={function(){var d=r1(10);var t=d+(st.REF||0);sRollP({label:s.name+" Атака",d10:d,parts:[{label:"REF",value:st.REF||0}],total:t});pr.addLog({who:s.name,type:"hit",label:"🎯 Атака",detail:"🎲"+d+" + REF("+(st.REF||0)+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #3b82f620",background:"#0e1a2b",fontSize:8,fontWeight:700,color:"#60a5fa",cursor:"pointer"}}>🎯 Атака</button>}
+<button onClick={function(){var R=rollHit();var d=R.d;var t=d+(st.REF||0);sRollP({label:s.name+" Атака",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"REF",value:st.REF||0}],total:t});pr.addLog({who:s.name,type:"hit",label:"🎯 Атака"+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + REF("+(st.REF||0)+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #3b82f620",background:"#0e1a2b",fontSize:8,fontWeight:700,color:"#60a5fa",cursor:"pointer"}}>🎯 Атака</button>}
 <button onClick={function(){npcMagic(s,id)}} style={{padding:"3px 5px",borderRadius:4,border:"1px solid #7c3aed20",background:"#1f1330",fontSize:7,fontWeight:700,color:"#7c3aed",cursor:"pointer"}}>{"🔮"+(playerTgtId?" →":"")}</button>
-<button onClick={function(){var d=r1(10);var dv=st.DEX||0;var dg=sk.dodge||0;var t=d+dv+dg;sRollP({label:s.name+" — Уклонение",d10:d,parts:[{label:"DEX",value:dv},{label:"Dodge",value:dg}],total:t});pr.addLog({who:s.name,type:"dodge",label:"🛡️ Уклонение",detail:"🎲"+d+" + DEX("+dv+") + Dodge("+dg+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #10b98120",background:"#0e2018",fontSize:8,fontWeight:700,color:"#34d399",cursor:"pointer"}}>🛡️ Уклон.</button>
+<button onClick={function(){var R=rollHit();var d=R.d;var dv=st.DEX||0;var dg=sk.dodge||0;var t=d+dv+dg;sRollP({label:s.name+" — Уклонение",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"DEX",value:dv},{label:"Dodge",value:dg}],total:t});pr.addLog({who:s.name,type:"dodge",label:"🛡️ Уклонение"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + DEX("+dv+") + Dodge("+dg+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #10b98120",background:"#0e2018",fontSize:8,fontWeight:700,color:"#34d399",cursor:"pointer"}}>🛡️ Уклон.</button>
 </div></div>})}
 </div>}
 
