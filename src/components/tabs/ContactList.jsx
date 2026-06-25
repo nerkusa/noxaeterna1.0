@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { S } from '../../styles/ui';
-import CombatTab from './CombatTab';
+import { uid } from '../../utils/dice';
 
 function ContactList(pr){var _s=useState(false);var sa=_s[0];var sSA=_s[1];var _n=useState("");var cn=_n[0];var sCN=_n[1];var _r=useState("");var cr=_r[0];var sCR=_r[1];var _b=useState("");var cb=_b[0];var sCB=_b[1];var _re=useState("");var cre=_re[0];var sCRE=_re[1];var _ed=useState(null);var eid=_ed[0];var sEid=_ed[1];
-function addC(){if(!cn.trim())return;if(eid){pr.onChange(pr.items.map(function(it){return it.id===eid?Object.assign({},it,{name:cn.trim(),race:cr.trim(),bio:cb.trim(),reason:cre.trim()}):it}));sEid(null)}else{pr.onChange(pr.items.concat([{id:Date.now(),name:cn.trim(),race:cr.trim(),bio:cb.trim(),reason:cre.trim()}]))}sCN("");sCR("");sCB("");sCRE("");sSA(false)}
+function addC(){if(!cn.trim())return;if(eid){pr.onChange(pr.items.map(function(it){return it.id===eid?Object.assign({},it,{name:cn.trim(),race:cr.trim(),bio:cb.trim(),reason:cre.trim()}):it}));sEid(null)}else{pr.onChange(pr.items.concat([{id:uid(),name:cn.trim(),race:cr.trim(),bio:cb.trim(),reason:cre.trim()}]))}sCN("");sCR("");sCB("");sCRE("");sSA(false)}
 function startEdit(it){sCN(it.name);sCR(it.race||"");sCB(it.bio||"");sCRE(it.reason||"");sEid(it.id);sSA(true)}
 return(<div style={{border:"2px solid "+pr.color+"20",borderRadius:9,padding:"6px 8px",background:pr.bg+"60"}}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}><label style={Object.assign({},S.lb,{color:pr.color})}>{pr.label}</label><button onClick={function(){sSA(!sa);sEid(null);sCN("");sCR("");sCB("");sCRE("")}} style={{fontSize:8,background:"none",border:"none",cursor:"pointer",color:pr.color,fontWeight:700}}>{sa?"✕":"+ Добавить"}</button></div>

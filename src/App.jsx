@@ -60,7 +60,7 @@ get(ref(db,"rooms/"+room+"/characters")).then(function(snap){
   set(ref(db,"rooms/"+room+"/characters/"+nid),nC(pN));
   sPId(nid);
 })},[room,isGM,pN,pId]);
-function saveChar(id,d){if(!room)return;var c=Object.assign({},d);delete c._fbId;set(ref(db,"rooms/"+room+"/characters/"+id),c)}
+function saveChar(id,d){if(!room)return;var c=Object.assign({},d);delete c._fbId;set(ref(db,"rooms/"+room+"/characters/"+id),c);sCh(function(p){var n=Object.assign({},p);n[id]=c;return n})}
 function deleteChar(id){if(!room)return;remove(ref(db,"rooms/"+room+"/characters/"+id))}
 function saveLore(d){if(!room)return;set(ref(db,"rooms/"+room+"/lore"),d)}
 function saveMap(d){if(!room)return;set(ref(db,"rooms/"+room+"/mapData"),d)}

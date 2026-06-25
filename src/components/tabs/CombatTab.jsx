@@ -6,7 +6,7 @@ import { DT, WS, WT } from '../../data/stats';
 import { S } from '../../styles/ui';
 import { cF, mHP } from '../../utils/character';
 import { applyDmgToNpc } from '../../utils/combat';
-import { pk, r1, rN, sm } from '../../utils/dice';
+import { pk, r1, rN, sm, uid } from '../../utils/dice';
 import ArmorSection from './ArmorSection';
 import InvTab from './InvTab';
 import ShopPicker from '../ShopPicker';
@@ -155,7 +155,7 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 {/* Оружие */}
 <div style={{background:"#262219",border:"2px solid #f59e0b18",borderRadius:9,padding:"7px 8px"}}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><label style={S.lb}>⚔️ Оружие</label><button onClick={function(){sSA(!sa)}} style={{fontSize:9,background:"#0e1a2b",border:"1px solid #3b82f640",borderRadius:5,padding:"2px 8px",cursor:"pointer",color:"#60a5fa",fontWeight:700}}>{sa?"✕ Закрыть":"➕ Своё оружие"}</button></div>
-<ShopPicker color="#3b82f6" items={(pr.shop||[]).filter(function(i){return i.cat==="weapon"})} sub={function(it){var h=it.hands===2?"двуруч.":it.hands===1.5?"полуторн.":"одноруч.";return it.wtype+" · "+it.dmgDice+(it.bonus?"+"+it.bonus:"")+" · "+it.dmgType+" · "+h}} onPick={function(it){var newW={id:Date.now(),name:it.name,type:it.wtype,dmgType:it.dmgType,bonus:it.bonus||0,dmgDice:it.dmgDice,hands:it.hands};if(it.hands===1.5){newW.dmgDice2h=it.dmgDice2h;newW.bonus2h=it.bonus2h||0;}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([newW])}))}}/>
+<ShopPicker color="#3b82f6" items={(pr.shop||[]).filter(function(i){return i.cat==="weapon"})} subOf={function(it){return it.wtype}} suborder={["Battle","Simple","Guns","Archery"]} sublabels={{Battle:"⚔️ Боевое оружие",Simple:"🗡️ Простое оружие",Guns:"🔫 Огнестрел",Archery:"🏹 Лук"}} sub={function(it){var h=it.hands===2?"двуруч.":it.hands===1.5?"полуторн.":"одноруч.";return it.wtype+" · "+it.dmgDice+(it.bonus?"+"+it.bonus:"")+" · "+it.dmgType+" · "+h}} onPick={function(it){var newW={id:uid(),name:it.name,type:it.wtype,dmgType:it.dmgType,bonus:it.bonus||0,dmgDice:it.dmgDice,hands:it.hands};if(it.hands===1.5){newW.dmgDice2h=it.dmgDice2h;newW.bonus2h=it.bonus2h||0;}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([newW])}))}}/>
 {sa&&<div style={{background:"#262219",border:"1px solid #322d24",borderRadius:8,padding:6,marginBottom:4,display:"flex",flexDirection:"column",gap:3}}>
 <input style={S.inp} value={wn} onChange={function(e){sWN(e.target.value)}} placeholder="Название"/>
 <div style={{display:"flex",gap:3}}>
@@ -169,7 +169,7 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 <div style={{display:"flex",gap:3,alignItems:"center"}}><span style={{fontSize:8,color:"#a89a82",width:42}}>1 рука:</span><input style={Object.assign({},S.inp,{flex:1,fontSize:9,padding:3})} value={wdi} onChange={function(e){sWDI(e.target.value)}} placeholder="1d8"/><input style={Object.assign({},S.inp,{width:36,fontSize:9,padding:3})} type="number" value={wb} onChange={function(e){sWB(parseInt(e.target.value)||0)}} placeholder="Бнс"/></div>
 <div style={{display:"flex",gap:3,alignItems:"center"}}><span style={{fontSize:8,color:"#a89a82",width:42}}>2 руки:</span><input style={Object.assign({},S.inp,{flex:1,fontSize:9,padding:3})} value={wdi2} onChange={function(e){sWDI2(e.target.value)}} placeholder="2d8"/><input style={Object.assign({},S.inp,{width:36,fontSize:9,padding:3})} type="number" value={wb2} onChange={function(e){sWB2(parseInt(e.target.value)||0)}} placeholder="Бнс"/></div>
 </div>}
-<button onClick={function(){if(!wn.trim())return;var newW={id:Date.now(),name:wn.trim(),type:wt,dmgType:wdt,bonus:wb,dmgDice:wdi,hands:wh};if(wh===1.5){newW.dmgDice2h=wdi2;newW.bonus2h=wb2;}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([newW])}));sWN("");sSA(false);sWH(1);sWDI("1d6");sWDI2("2d6");sWB2(0);}} style={{padding:5,borderRadius:5,border:"none",background:"#10b981",color:"#fff",fontWeight:700,fontSize:10,cursor:"pointer"}}>Добавить</button>
+<button onClick={function(){if(!wn.trim())return;var newW={id:uid(),name:wn.trim(),type:wt,dmgType:wdt,bonus:wb,dmgDice:wdi,hands:wh};if(wh===1.5){newW.dmgDice2h=wdi2;newW.bonus2h=wb2;}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([newW])}));sWN("");sSA(false);sWH(1);sWDI("1d6");sWDI2("2d6");sWB2(0);}} style={{padding:5,borderRadius:5,border:"none",background:"#10b981",color:"#fff",fontWeight:700,fontSize:10,cursor:"pointer"}}>Добавить</button>
 </div>}
 {(c.weapons||[]).length===0&&!sa&&<div style={{textAlign:"center",padding:"10px 6px",color:"#a89a82",fontStyle:"italic",fontSize:9,border:"1px dashed #322d24",borderRadius:7}}>Нет оружия — нажми «+ Оружие», чтобы добавить</div>}
 {(c.weapons||[]).map(function(w){var sk=WS[w.type]||"Simple Weapon";var isEq=c.equippedWeapon===w.id;var curMode=c.weaponMode||"1h";var activeDice=(w.hands===1.5&&curMode==="2h")?(w.dmgDice2h||w.dmgDice):w.dmgDice;var activeBon=(w.hands===1.5&&curMode==="2h")?(w.bonus2h!==undefined?w.bonus2h:w.bonus||0):(w.bonus||0);var handsLabel=w.hands===2?"двуручное":w.hands===1.5?"полуторное":"одноручное";var handsClr=w.hands===2?"#f87171":w.hands===1.5?"#f0b352":"#60a5fa";var handsBg=w.hands===2?"#311717":w.hands===1.5?"#231b08":"#0e1a2b";
