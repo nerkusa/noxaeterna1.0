@@ -119,7 +119,7 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
   if(ok){
     /* Попадание — урон по выбранному NPC */
     if(tgtNpc&&tgtId&&saveSpawned){
-      applyDmgToNpc(tgtNpc,ft,"Д",selZone,saveSpawned,spawned,tgtId,pr.addLog,c.name||"???",pr.onNpcDeath);
+      applyDmgToNpc(tgtNpc,ft,"Д",selZone,saveSpawned,spawned,tgtId,pr.addLog,c.name||"???",pr.onNpcDeath,"🔮 Заклинание",pr.saveNpcHit);
     }
     sub="✨ ПОПАД! "+ft+"\n−1 WILL"+(tgtNpc?" → "+tgtNpc.name:" (нет цели)");
     pr.addLog({who:c.name||"???",type:"magic",label:"🔮 Заклинание ПОПАД!"+(tgtNpc?" → "+tgtNpc.name:""),detail:"3d12+1d6="+ft,total:ft});
@@ -194,7 +194,7 @@ else{oR({label:w.name+" Попад.",d10:d,parts:[{label:"REF",value:rv},{label:
   if(warDmgBon)sv(Object.assign({},c,{warriorBonus:false}));
   var rawDmg=sm(dice)+activeBon+warDmgBon;
   if(tgtNpc&&tgtId&&saveSpawned){
-    applyDmgToNpc(tgtNpc,rawDmg,w.dmgType,selZone,saveSpawned,spawned,tgtId,pr.addLog,c.name||"???",pr.onNpcDeath);
+    applyDmgToNpc(tgtNpc,rawDmg,w.dmgType,selZone,saveSpawned,spawned,tgtId,pr.addLog,c.name||"???",pr.onNpcDeath,w.name,pr.saveNpcHit);
   } else {
     pr.addLog({who:c.name||"???",type:"dmg",label:"💥 "+w.name+" ("+w.dmgType+")"+(warDmgBon?" ⚔️+5":""),detail:activeDice+"["+dice.join(",")+"]"+(w.bonus?("+бнс("+w.bonus+")"):"")+(warDmgBon?"+⚔️5":"")+" = "+rawDmg,total:rawDmg});
   }

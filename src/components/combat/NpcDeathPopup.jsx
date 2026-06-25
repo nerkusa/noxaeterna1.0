@@ -7,7 +7,7 @@ function NpcDeathPopup(pr){
       <div style={{fontSize:36,marginBottom:4}}>💀</div>
       <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:16,marginBottom:4}}>{ev.npcName}</div>
       <div style={{fontSize:11,color:"#9a8f7c",marginBottom:12}}>повержен!</div>
-      <button onClick={pr.onClose} style={{width:"100%",padding:8,borderRadius:8,border:"2px solid #ece5d8",background:"#ece5d8",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,cursor:"pointer"}}>OK</button>
+      <button onClick={pr.onClose} style={{width:"100%",padding:8,borderRadius:8,border:"2px solid #3a3429",background:"#1d1a14",color:"#ece5d8",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,cursor:"pointer"}}>OK</button>
     </div>
   </div>)}
 
