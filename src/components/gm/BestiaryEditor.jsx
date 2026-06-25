@@ -5,7 +5,7 @@ import { DT, SD, WT } from '../../data/stats';
 import { S } from '../../styles/ui';
 import { cF, mHP } from '../../utils/character';
 import { calcAE } from '../../utils/combat';
-import { r1, rN, sm } from '../../utils/dice';
+import { r1, rN, sm, uid } from '../../utils/dice';
 import GMAttackPanel from '../combat/GMAttackPanel';
 import PlayerAttackNotif from '../combat/PlayerAttackNotif';
 import RollPopup from '../combat/RollPopup';
@@ -26,7 +26,7 @@ var _nskills=useState({dodge:2,resist:2});var nskills=_nskills[0];var sNSkills=_
 var _nweapons=useState([]);var nweapons=_nweapons[0];var sNWeapons=_nweapons[1];
 var _nar=useState("none");var nar=_nar[0];var sNAR=_nar[1];var _narh=useState(10);var narh=_narh[0];var sNARH=_narh[1];
 var _narbod=useState("none");var narbod=_narbod[0];var sNARBOD=_narbod[1];var _narbh=useState(10);var narbh=_narbh[0];var sNARBH=_narbh[1];
-var _twn=useState("");var twn=_twn[0];var sTWN=_twn[1];var _twd=useState("1d6");var twd=_twd[0];var sTWD=_twd[1];var _twt=useState("Battle");var twt=_twt[0];var sTWT=_twt[1];var _twdt=useState("Р");var twdt=_twdt[0];var sTWDT=_twdt[1];var _twb=useState(0);var twb=_twb[0];var sTWB=_twb[1];
+var _twn=useState("");var twn=_twn[0];var sTWN=_twn[1];var _twd=useState("1d6");var twd=_twd[0];var sTWD=_twd[1];var _twt=useState("Battle");var twt=_twt[0];var sTWT=_twt[1];var _twdt=useState("Р");var twdt=_twdt[0];var sTWDT=_twdt[1];var _twb=useState(0);var twb=_twb[0];var sTWB=_twb[1];var _tmgc=useState(false);var tmgc=_tmgc[0];var sTMGC=_tmgc[1];
 var _editNpc=useState(null);var editNpc=_editNpc[0];var sEditNpc=_editNpc[1];
 var cats=Object.keys(templ);
 var playerChars=(pr.characters||[]).filter(function(x){return x.active});if(playerChars.length===0)playerChars=(pr.characters||[]);
@@ -38,7 +38,7 @@ function resetForm(){sNN("");sNL(1);sNHP(20);sNStats({INT:3,REF:3,DEX:3,BODY:3,E
 function loadNpcToForm(n){sNN(n.name||"");sNL(n.level||1);sNHP(n.maxHp||20);sNStats(n.stats||{INT:3,REF:3,DEX:3,BODY:3,EMP:1,CRA:1,WILL:3});sNSkills(n.skills||{dodge:2,resist:2});sNWeapons(n.weapons||[]);sNAR(n.armorHead||"none");sNARH(n.armorHeadHp||10);sNARBOD(n.armorBody||"none");sNARBH(n.armorBodyHp||10)}
 function saveNpc(){if(!nn.trim()||!selCat)return;var n=Object.assign({},templ);if(!n[selCat])n[selCat]={_created:Date.now()};var id=editNpc||("npc_"+Date.now());n[selCat][id]={name:nn.trim(),level:nl,hp:nhp,maxHp:nhp,stats:Object.assign({},nstats),skills:Object.assign({},nskills),weapons:nweapons.slice(),armorHead:nar,armorHeadHp:narh,armorHeadMaxHp:narh,armorBody:narbod,armorBodyHp:narbh,armorBodyMaxHp:narbh};pr.saveNpcTempl(n);resetForm()}
 function delNpc(cat,id){var n=Object.assign({},templ);if(n[cat])delete n[cat][id];pr.saveNpcTempl(n)}
-function addTmpWeapon(){if(!twn.trim())return;sNWeapons(nweapons.concat([{id:Date.now(),name:twn.trim(),dice:twd,type:twt,dmgType:twdt,bonus:twb}]));sTWN("")}
+function addTmpWeapon(){if(!twn.trim())return;sNWeapons(nweapons.concat([{id:uid(),name:twn.trim(),dice:twd,type:twt,dmgType:twdt,bonus:twb,magic:tmgc}]));sTWN("");sTMGC(false)}
 function spawnNpc(cat,id){var t=templ[cat]&&templ[cat][id];if(!t)return;var sp=Object.assign({},spawned);var sid="s_"+Date.now();sp[sid]=Object.assign({},t,{_catId:cat,_tmplId:id,spawnedAt:Date.now()});pr.saveSpawned(sp);pr.addLog({who:"ГМ",type:"spawn",label:"👹 "+t.name+" появился!",detail:"",total:0})}
 function despawn(id){var sp=Object.assign({},spawned);delete sp[id];pr.saveSpawned(sp)}
 function updateSpawned(id,data){var sp=Object.assign({},spawned);sp[id]=data;pr.saveSpawned(sp)}
@@ -70,17 +70,18 @@ function applyDmgToPlayer(ptgt,rawDmg,dmgType,zoneName,who){
 /* NPC: бросок на попадание */
 function npcAttack(s,w){
   var st=s.stats||{};var sk=s.skills||{};
-  var skMap={Battle:"battleWeapon",Simple:"simpleWeapon",Guns:"guns",Archery:"archery"};
-  var skVal=sk[skMap[w.type]]||0;
-  var d=r1(10);var rv=st.REF||0;var t=d+rv+skVal+(w.bonus||0);
+  var rv,skVal,skNm,atName;
+  if(w.magic){rv=st.WILL||0;skVal=sk.spellcast||0;skNm="Spellcast";atName="WILL";}
+  else{var skMap={Battle:"battleWeapon",Simple:"simpleWeapon",Guns:"guns",Archery:"archery"};skVal=sk[skMap[w.type]]||0;rv=st.REF||0;skNm=w.type;atName="REF";}
+  var d=r1(10);var t=d+rv+skVal+(w.bonus||0);
   var tgtChar=playerTgtId?playerChars.find(function(x){return x._fbId===playerTgtId}):null;
   var tgtName=tgtChar?tgtChar.name:"";
-  pr.addLog({who:s.name,type:"hit",label:"🎯 "+w.name+(tgtName?" → "+tgtName:""),detail:"🎲"+d+" + REF("+rv+") + "+w.type+"("+skVal+") + бонус("+(w.bonus||0)+") = "+t,total:t});
+  pr.addLog({who:s.name,type:"hit",label:(w.magic?"🔮 ":"🎯 ")+w.name+(tgtName?" → "+tgtName:""),detail:"🎲"+d+" + "+atName+"("+rv+") + "+skNm+"("+skVal+") + бонус("+(w.bonus||0)+") = "+t,total:t});
   /* RollPopup не показываем — результат отображается в GMAttackPanel */
-  if(!playerTgtId){sRollP({label:s.name+" — "+w.name+" Попад.",d10:d,parts:[{label:"REF",value:rv},{label:w.type,value:skVal},{label:"Бнс",value:w.bonus||0}],total:t,subtext:"(нет цели)"});}
+  if(!playerTgtId){sRollP({label:s.name+" — "+w.name+" Попад.",d10:d,parts:[{label:atName,value:rv},{label:skNm,value:skVal},{label:"Бнс",value:w.bonus||0}],total:t,subtext:"(нет цели)"});}
   if(playerTgtId&&pr.savePendingAttack){
     pr.savePendingAttack({id:"atk_"+Date.now(),attackerName:s.name,targetId:playerTgtId,targetName:tgtName,
-      hitRoll:t,atkD:d,atkREF:rv,atkSkill:skVal,atkSkillName:w.type,atkBonus:w.bonus||0,
+      hitRoll:t,atkD:d,atkREF:rv,atkSkill:skVal,atkSkillName:skNm,atkBonus:w.bonus||0,
       weaponName:w.name,dmgDice:w.dice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:w.bonus||0,
       zone:playerZone,status:"pending_dodge",ts:Date.now()});
   }
@@ -166,7 +167,7 @@ return <div key={id} style={{background:"#262219",border:"1px solid #322d24",bor
 {s.armorBody&&s.armorBody!=="none"&&<div style={{fontSize:7,color:"#94a3b8"}}>🫀 {s.armorBody} {s.armorBodyHp||0}/{s.armorBodyMaxHp||0}</div>}
 <div style={{display:"flex",gap:2,marginTop:3,flexWrap:"wrap"}}>
 {wpns.length>0?wpns.map(function(w,wi){return <div key={wi} style={{display:"flex",gap:1,marginBottom:1}}>
-<button onClick={function(){npcAttack(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #3b82f620",background:"#0e1a2b",fontSize:7,fontWeight:700,color:"#60a5fa",cursor:"pointer"}}>{"🎯 "+w.name+(playerTgtId?" →":"")}</button>
+<button onClick={function(){npcAttack(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid "+(w.magic?"#7c3aed40":"#3b82f620"),background:w.magic?"#1f1330":"#0e1a2b",fontSize:7,fontWeight:700,color:w.magic?"#a78bfa":"#60a5fa",cursor:"pointer"}}>{(w.magic?"🔮 ":"🎯 ")+w.name+(playerTgtId?" →":"")}</button>
 <button onClick={function(){npcDmg(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #ef444420",background:"#2a1414",fontSize:7,fontWeight:700,color:"#dc2626",cursor:"pointer"}}>{"💥"+(playerTgtId?" →":"")}</button>
 </div>}):
 <button onClick={function(){var d=r1(10);var t=d+(st.REF||0);sRollP({label:s.name+" Атака",d10:d,parts:[{label:"REF",value:st.REF||0}],total:t});pr.addLog({who:s.name,type:"hit",label:"🎯 Атака",detail:"🎲"+d+" + REF("+(st.REF||0)+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #3b82f620",background:"#0e1a2b",fontSize:8,fontWeight:700,color:"#60a5fa",cursor:"pointer"}}>🎯 Атака</button>}
@@ -197,7 +198,8 @@ return <div key={id} style={{background:"#262219",border:"1px solid #322d24",bor
 </div>
 <div style={{fontSize:8,fontWeight:700,marginTop:2}}>Оружие ({nweapons.length})</div>
 {nweapons.map(function(w,i){return <div key={i} style={{display:"flex",alignItems:"center",gap:3,fontSize:8,padding:"2px 4px",background:"#1d1a14",border:"1px solid #322d24",borderRadius:4}}><span style={{flex:1,fontWeight:600}}>{w.name} {w.dice} {w.dmgType} +{w.bonus}</span><button onClick={function(){sNWeapons(nweapons.filter(function(x,j){return j!==i}))}} style={{background:"none",border:"none",color:"#ef4444",cursor:"pointer",fontSize:8}}>✕</button></div>})}
-<div style={{display:"flex",gap:2,flexWrap:"wrap"}}><input style={Object.assign({},S.inp,{flex:2,minWidth:60,fontSize:8,padding:2})} value={twn} onChange={function(e){sTWN(e.target.value)}} placeholder="Оружие"/><input style={Object.assign({},S.inp,{width:35,fontSize:8,padding:2})} value={twd} onChange={function(e){sTWD(e.target.value)}} placeholder="1d6"/><select value={twt} onChange={function(e){sTWT(e.target.value)}} style={Object.assign({},S.inp,{width:50,fontSize:8,padding:2})}>{WT.map(function(t){return <option key={t} value={t}>{t}</option>})}</select><select value={twdt} onChange={function(e){sTWDT(e.target.value)}} style={Object.assign({},S.inp,{width:30,fontSize:8,padding:2})}>{DT.map(function(t){return <option key={t} value={t}>{t}</option>})}</select><input style={Object.assign({},S.inp,{width:28,fontSize:8,padding:2})} type="number" value={twb} onChange={function(e){sTWB(parseInt(e.target.value)||0)}} placeholder="+"/><button onClick={addTmpWeapon} style={{padding:"2px 6px",borderRadius:3,border:"none",background:"#10b981",color:"#fff",fontWeight:700,fontSize:7,cursor:"pointer"}}>+</button></div>
+<div style={{display:"flex",gap:2,flexWrap:"wrap"}}><input style={Object.assign({},S.inp,{flex:2,minWidth:60,fontSize:8,padding:2})} value={twn} onChange={function(e){sTWN(e.target.value)}} placeholder="Оружие"/><input style={Object.assign({},S.inp,{width:35,fontSize:8,padding:2})} value={twd} onChange={function(e){sTWD(e.target.value)}} placeholder="1d6"/><select value={twt} onChange={function(e){sTWT(e.target.value)}} style={Object.assign({},S.inp,{width:50,fontSize:8,padding:2})}>{WT.map(function(t){return <option key={t} value={t}>{t}</option>})}</select><select value={twdt} onChange={function(e){sTWDT(e.target.value)}} style={Object.assign({},S.inp,{width:30,fontSize:8,padding:2})}>{DT.map(function(t){return <option key={t} value={t}>{t}</option>})}</select><input style={Object.assign({},S.inp,{width:28,fontSize:8,padding:2})} type="number" value={twb} onChange={function(e){sTWB(parseInt(e.target.value)||0)}} placeholder="+"/><button onClick={function(){sTMGC(!tmgc)}} title="Заклинание (попадание по WILL+Spellcast)" style={{padding:"2px 6px",borderRadius:3,border:"1px solid #7c3aed40",background:tmgc?"#7c3aed":"#1f1330",color:tmgc?"#fff":"#a78bfa",fontWeight:700,fontSize:8,cursor:"pointer"}}>🔮</button><button onClick={addTmpWeapon} style={{padding:"2px 6px",borderRadius:3,border:"none",background:"#10b981",color:"#fff",fontWeight:700,fontSize:7,cursor:"pointer"}}>+</button></div>
+{tmgc&&<div style={{fontSize:7,color:"#a78bfa",fontStyle:"italic"}}>🔮 Заклинание: попадание по WILL + Spellcast</div>}
 <div style={{fontSize:8,fontWeight:700,marginTop:2}}>Броня</div>
 <div style={{display:"flex",gap:3}}><div style={{flex:1}}><label style={{fontSize:6,fontWeight:700}}>🧠 Голова</label><select value={nar} onChange={function(e){sNAR(e.target.value)}} style={Object.assign({},S.inp,{fontSize:8,padding:2})}>{ARMOR_T.map(function(a){return <option key={a.id} value={a.id}>{a.name}</option>})}</select>{nar!=="none"&&<input style={Object.assign({},S.inp,{fontSize:8,padding:2,marginTop:2})} type="number" value={narh} onChange={function(e){sNARH(parseInt(e.target.value)||1)}} placeholder="HP"/>}</div><div style={{flex:1}}><label style={{fontSize:6,fontWeight:700}}>🫀 Тело</label><select value={narbod} onChange={function(e){sNARBOD(e.target.value)}} style={Object.assign({},S.inp,{fontSize:8,padding:2})}>{ARMOR_T.map(function(a){return <option key={a.id} value={a.id}>{a.name}</option>})}</select>{narbod!=="none"&&<input style={Object.assign({},S.inp,{fontSize:8,padding:2,marginTop:2})} type="number" value={narbh} onChange={function(e){sNARBH(parseInt(e.target.value)||1)}} placeholder="HP"/>}</div></div>
 <div style={{display:"flex",gap:3,marginTop:2}}><button onClick={function(){saveNpc();sCat(cat)}} style={{flex:1,padding:6,borderRadius:5,border:"none",background:"#ef4444",color:"#fff",fontWeight:700,fontSize:10,cursor:"pointer"}}>{editNpc?"💾 Сохранить":"Создать NPC"}</button>{editNpc&&<button onClick={resetForm} style={{padding:"6px 10px",borderRadius:5,border:"2px solid #322d24",background:"#262219",fontWeight:700,fontSize:10,cursor:"pointer"}}>Отмена</button>}</div>
