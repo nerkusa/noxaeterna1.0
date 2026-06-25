@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ARMOR_T } from '../../data/combat';
 import { S } from '../../styles/ui';
 import { sm } from '../../utils/dice';
+import ShopPicker from '../ShopPicker';
 
 function ArmorSection(pr){var c=pr.char;var sv=pr.save;var fs=pr.finalStats;
 var _saa=useState(false);var saa=_saa[0];var sSAA=_saa[1];
@@ -22,6 +23,7 @@ var equippedW=(c.weapons||[]).find(function(w){return w.id===c.equippedWeapon});
 var shieldBlocked=equippedW&&(equippedW.hands===2||(equippedW.hands===1.5&&(c.weaponMode||"1h")==="2h"));
 return <div style={{background:"#262219",border:"2px solid #64748b18",borderRadius:9,padding:"7px 8px"}}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><label style={S.lb}>🛡️ Броня</label><button onClick={function(){sSAA(!saa)}} style={{fontSize:9,background:"#0e2018",border:"1px solid #10b98140",borderRadius:5,padding:"2px 8px",cursor:"pointer",color:"#34d399",fontWeight:700}}>{saa?"✕ Закрыть":"➕ Добавить броню"}</button></div>
+<ShopPicker color="#10b981" items={(pr.shop||[]).filter(function(i){return i.cat==="armor"})} sub={function(it){var a=ARMOR_T.find(function(x){return x.id===it.type});return (a?a.name:it.type)+" · "+it.hp+" HP"}} onPick={function(it){var at2=ARMOR_T.find(function(a){return a.id===it.type})||ARMOR_T[0];if(fs.BODY<at2.bodyReq){alert("BODY("+fs.BODY+")<"+at2.bodyReq);return}sv(Object.assign({},c,{armors:(c.armors||[]).concat([{id:Date.now(),name:it.name,type:it.type,hp:it.hp,maxHp:it.hp}])}))}}/>
 {/* Слот щита — как инвентарь */}
 <div style={{marginBottom:6,padding:"5px 7px",background:"#0e1a2b",border:"1px solid #38bdf828",borderRadius:7}}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
