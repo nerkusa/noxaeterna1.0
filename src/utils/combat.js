@@ -23,7 +23,7 @@ function calcAE(at,dt,rd){
 }
 
 /* ── applyDmgToNpc: применить урон к заспавненному NPC ── */
-function applyDmgToNpc(npc,rawDmg,dmgType,zoneName,saveSpawnedFn,spawnedAll,npcId,addLog,who,onNpcDeath){
+function applyDmgToNpc(npc,rawDmg,dmgType,zoneName,saveSpawnedFn,spawnedAll,npcId,addLog,who,onNpcDeath,srcLabel,broadcast){
   var z=ZONES.find(function(x){return x.name===zoneName})||ZONES[2];
   var multiplied=Math.floor(rawDmg*z.mult);
   var ignArmor=z.ignoreArmor;
@@ -66,6 +66,7 @@ function applyDmgToNpc(npc,rawDmg,dmgType,zoneName,saveSpawnedFn,spawnedAll,npcI
     detail:ae.desc+(ae.ad>0?" | "+armorName+" "+armorHp+"→"+newArmorHp:"")+" | ❤️ "+curHp+"→"+newHp,
     total:ae.hd
   });
+  if(broadcast){broadcast({attackerName:who,srcLabel:srcLabel||"",npcName:npc.name,zone:z.name,zoneE:z.e,zoneMult:z.mult,dmgType:dmgType,dmg:ae.hd,oldHp:curHp,newHp:newHp,desc:ae.desc,ts:Date.now()});}
   if(newHp<=0&&onNpcDeath){onNpcDeath({npcName:npc.name});}
 }
 

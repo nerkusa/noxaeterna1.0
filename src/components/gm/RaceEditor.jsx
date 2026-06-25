@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { RACES } from '../../data/races';
-import { SD } from '../../data/stats';
+import { SD, SKD } from '../../data/stats';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #322d24', background: '#1d1a14', color: '#ece5d8', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
 const inp = { width: '100%', padding: '6px 8px', border: '2px solid #322d24', borderRadius: 6, fontSize: 12, fontFamily: "'Nunito',sans-serif", background: '#262219', color: '#ece5d8', outline: 'none' };
@@ -19,6 +19,7 @@ export default function RaceEditor(pr) {
   const saveRaces = pr.saveRaces;
   const races = normalize(pr.races);
   const [openId, setOpenId] = useState(null);
+  const [showSk, setShowSk] = useState(false);
 
   const persist = (arr) => saveRaces(arr);
   const updateRace = (id, patch) => persist(races.map(r => r.id === id ? Object.assign({}, r, patch) : r));
@@ -29,6 +30,15 @@ export default function RaceEditor(pr) {
       const v = Math.max(-3, Math.min(3, (st[key] || 0) + delta));
       if (v === 0) delete st[key]; else st[key] = v;
       return Object.assign({}, r, { st: st });
+    }));
+  };
+  const setSkill = (id, name, delta) => {
+    persist(races.map(r => {
+      if (r.id !== id) return r;
+      const sk = Object.assign({}, r.sk);
+      const v = Math.max(-3, Math.min(5, (sk[name] || 0) + delta));
+      if (v === 0) delete sk[name]; else sk[name] = v;
+      return Object.assign({}, r, { sk: sk });
     }));
   };
   const addRace = () => {
@@ -90,6 +100,35 @@ export default function RaceEditor(pr) {
                       );
                     })}
                   </div>
+                </div>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                    <label style={Object.assign({}, lbl, { marginBottom: 0 })}>Бонусы навыков</label>
+                    <button onClick={function () { setShowSk(!showSk); }} style={{ background: 'none', border: 'none', color: '#34d399', fontSize: 9, fontWeight: 700, cursor: 'pointer' }}>{showSk ? 'скрыть ▲' : 'показать ▼'}</button>
+                  </div>
+                  {!showSk && (function () {
+                    const sm2 = Object.entries(r.sk || {});
+                    return <div style={{ fontSize: 9, color: '#a89a82' }}>{sm2.length ? sm2.map(function (m) { return m[0] + ' +' + m[1]; }).join(', ') : 'без бонусов навыков'}</div>;
+                  })()}
+                  {showSk && SD.map(function (s) {
+                    const sks = SKD[s.key]; if (!sks) return null;
+                    return (
+                      <div key={s.key} style={{ marginBottom: 4 }}>
+                        <div style={{ fontSize: 8, fontWeight: 700, color: s.color, margin: '3px 0 1px' }}>{s.emoji + ' ' + s.key}</div>
+                        {sks.map(function (sk) {
+                          const v = (r.sk || {})[sk.name] || 0;
+                          return (
+                            <div key={sk.name} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '1px 2px' }}>
+                              <span style={{ flex: 1, fontSize: 9, color: v ? '#ece5d8' : '#a89a82' }}>{sk.name}{sk.x2 && <span style={{ color: '#ef4444', fontSize: 7 }}> ×2</span>}</span>
+                              <button onClick={function () { setSkill(r.id, sk.name, -1); }} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #322d24', background: '#262219', color: '#a89a82', fontSize: 10, cursor: 'pointer', padding: 0 }}>−</button>
+                              <span style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 12, minWidth: 18, textAlign: 'center', color: v > 0 ? '#34d399' : v < 0 ? '#f87171' : '#8d8270' }}>{v > 0 ? '+' + v : v}</span>
+                              <button onClick={function () { setSkill(r.id, sk.name, 1); }} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #322d24', background: '#262219', color: '#a89a82', fontSize: 10, cursor: 'pointer', padding: 0 }}>+</button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
                 </div>
                 <div>
                   <label style={lbl}>Особенность (необязательно)</label>

@@ -73,6 +73,8 @@ function PlayerAttackStatus(pr){
                 var spAll=Object.assign({},spawned);spAll[atk.npcId]=updNpc;
                 if(saveSpawned)saveSpawned(spAll);
                 if(addLog)addLog({who:atk.attackerName,type:"dmg",label:"💥 "+atk.weaponName+" → "+atk.npcName+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP",detail:"1d6="+zoneD+" "+zoneObj.name+" | "+ae.desc+" | ❤️ "+(npc.hp||0)+"→"+newNpcHp,total:ae.hd});
+                if(pr.onRoll)pr.onRoll({label:atk.weaponName+" 💥 Урон",d10:null,parts:[{label:atk.dmgDice||"1d6",value:sm(dice)},{label:"Бнс",value:atk.dmgBonus||0}],total:rawDmg,subtext:"Тип: "+(atk.dmgType||"Р")+"\n"+zoneObj.e+" "+zoneObj.name+" ×"+zoneObj.mult+"\n→ "+atk.npcName+": "+(npc.hp||0)+"→"+newNpcHp+" HP"});
+                if(pr.saveNpcHit)pr.saveNpcHit({attackerName:atk.attackerName,srcLabel:atk.weaponName||"",npcName:atk.npcName,zone:zoneObj.name,zoneE:zoneObj.e,zoneMult:zoneObj.mult,dmgType:atk.dmgType||"Р",dmg:ae.hd,oldHp:(npc.hp||0),newHp:newNpcHp,desc:ae.desc,ts:Date.now()});
                 remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id));
               }
               return(<div style={{marginTop:8}}>
