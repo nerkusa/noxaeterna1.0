@@ -104,6 +104,25 @@ export default function CheatTab() {
         <div style={{ fontSize: 9, color: '#8d8270', marginTop: 5 }}>Недоступен с двуручным оружием. Имеет свой запас HP.</div>
       </div>
 
+      <div style={Object.assign({}, card, { borderColor: '#7c3aed40' })}>
+        <div style={Object.assign({}, h, { color: '#a78bfa' })}>✨ Чудеса (магия)</div>
+        <div style={{ fontSize: 10, color: '#cabfa9', lineHeight: 1.7 }}>
+          Это не магия, а <b>чудо</b> — творится <b>Волей (WILL)</b>.<br /><br />
+          <b style={{ color: '#a78bfa' }}>Чудотворец — творение чуда:</b><br />
+          • Стоит <b>−1 WILL</b>. Опиши, что делаешь («Создал фаербол и метнул…»).<br />
+          • Урон: <b>3d12 + 1d6</b> (+1d6, если активен Хаот. Всплеск).<br />
+          • Бросок <b>1d6</b>: <b>≤3 — получилось</b> (урон по цели, тип Д).<br />
+          • <b>&gt;3 — срыв:</b> 50% урон себе, 50% — случайному союзнику.<br /><br />
+          <b style={{ color: '#a78bfa' }}>Чудо-атака (адресная, у магов-NPC):</b><br />
+          • Попадание: <b>d10 + WILL + Miracle</b>.<br /><br />
+          <b style={{ color: '#34d399' }}>Защита — Miracle Resist:</b><br />
+          • Цель бросает <b>d10 + WILL + Miracle Resist</b> против броска чуда.<br />
+          • Если <b>≥ броска атаки — устоял</b> (чудо не подействовало).<br />
+          • Бросить можно и отдельно — кнопка <b>«✨ Сопр.»</b> (у игрока во вкладке Бой, у NPC — в Бестиарии).<br />
+          • <b>Враги тоже защищаются</b> своим Miracle Resist.
+        </div>
+      </div>
+
       <div style={Object.assign({}, card, { borderColor: '#f59e0b30' })}>
         <div style={h}>📐 Порядок расчёта</div>
         <div style={{ fontSize: 10, color: '#cabfa9', lineHeight: 1.7 }}>

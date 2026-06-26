@@ -94,7 +94,7 @@ function npcAttack(s,w){
   if(playerTgtId&&pr.savePendingAttack){
     pr.savePendingAttack({id:"atk_"+Date.now(),attackerName:s.name,targetId:playerTgtId,targetName:tgtName,
       hitRoll:t,atkD:d,atkREF:rv,atkSkill:skVal,atkSkillName:skNm,atkBonus:w.bonus||0,
-      weaponName:w.name,dmgDice:w.dice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:w.bonus||0,
+      weaponName:w.name,dmgDice:w.dice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:w.bonus||0,magic:!!w.magic,
       zone:playerZone,status:"pending_dodge",ts:Date.now()});
   }
 }
@@ -195,6 +195,7 @@ return <div key={id} style={{background:"#262219",border:"1px solid #322d24",bor
 <button onClick={function(){var R=rollHit();var d=R.d;var t=d+(st.REF||0);sRollP({label:s.name+" Атака",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"REF",value:st.REF||0}],total:t});pr.addLog({who:s.name,type:"hit",label:"🎯 Атака"+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + REF("+(st.REF||0)+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #3b82f620",background:"#0e1a2b",fontSize:8,fontWeight:700,color:"#60a5fa",cursor:"pointer"}}>🎯 Атака</button>}
 <button onClick={function(){npcMagic(s,id)}} style={{padding:"3px 5px",borderRadius:4,border:"1px solid #7c3aed20",background:"#1f1330",fontSize:7,fontWeight:700,color:"#7c3aed",cursor:"pointer"}}>{"🔮"+(playerTgtId?" →":"")}</button>
 <button onClick={function(){var R=rollHit();var d=R.d;var dv=st.DEX||0;var dg=sk.dodge||0;var t=d+dv+dg;sRollP({label:s.name+" — Уклонение",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"DEX",value:dv},{label:"Dodge",value:dg}],total:t});pr.addLog({who:s.name,type:"dodge",label:"🛡️ Уклонение"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + DEX("+dv+") + Dodge("+dg+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #10b98120",background:"#0e2018",fontSize:8,fontWeight:700,color:"#34d399",cursor:"pointer"}}>🛡️ Уклон.</button>
+<button onClick={function(){var R=rollHit();var d=R.d;var wv=st.WILL||0;var mr=sk.mresist||0;var t=d+wv+mr;sRollP({label:s.name+" — Сопр. чуду",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"WILL",value:wv},{label:"M.Resist",value:mr}],total:t});pr.addLog({who:s.name,type:"magic",label:"✨ Сопротивление чуду"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + WILL("+wv+") + M.Resist("+mr+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #7c3aed20",background:"#1f1330",fontSize:8,fontWeight:700,color:"#a78bfa",cursor:"pointer"}}>✨ Сопр.</button>
 </div></div>})}
 </div>}
 
@@ -216,7 +217,7 @@ return <div key={id} style={{background:"#262219",border:"1px solid #322d24",bor
 <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:2}}>{SD.map(function(st){return <div key={st.key} style={{textAlign:"center"}}><label style={{fontSize:6,fontWeight:700,color:st.color}}>{st.emoji}{st.key}</label><input style={Object.assign({},S.inp,{fontSize:10,padding:2,textAlign:"center"})} type="number" value={nstats[st.key]||0} onChange={function(e){var ns=Object.assign({},nstats);ns[st.key]=parseInt(e.target.value)||0;sNStats(ns)}}/></div>})}</div>
 <div style={{fontSize:8,fontWeight:700,marginTop:2}}>Боевые навыки</div>
 <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:2}}>
-{[{k:"dodge",l:"Dodge"},{k:"resist",l:"Resistance"},{k:"brawl",l:"Brawl"},{k:"battleWeapon",l:"Battle Wpn"},{k:"simpleWeapon",l:"Simple Wpn"},{k:"guns",l:"Guns"},{k:"archery",l:"Archery"},{k:"athletics",l:"Athletics"},{k:"spellcast",l:"Spellcast"}].map(function(sk){return <div key={sk.k}><label style={{fontSize:5,fontWeight:700}}>{sk.l}</label><input style={Object.assign({},S.inp,{fontSize:9,padding:2,textAlign:"center"})} type="number" value={nskills[sk.k]||0} onChange={function(e){var ns=Object.assign({},nskills);ns[sk.k]=parseInt(e.target.value)||0;sNSkills(ns)}}/></div>})}
+{[{k:"dodge",l:"Dodge"},{k:"resist",l:"Resistance"},{k:"brawl",l:"Brawl"},{k:"battleWeapon",l:"Battle Wpn"},{k:"simpleWeapon",l:"Simple Wpn"},{k:"guns",l:"Guns"},{k:"archery",l:"Archery"},{k:"athletics",l:"Athletics"},{k:"spellcast",l:"Miracle"},{k:"mresist",l:"Miracle Resist"}].map(function(sk){return <div key={sk.k}><label style={{fontSize:5,fontWeight:700}}>{sk.l}</label><input style={Object.assign({},S.inp,{fontSize:9,padding:2,textAlign:"center"})} type="number" value={nskills[sk.k]||0} onChange={function(e){var ns=Object.assign({},nskills);ns[sk.k]=parseInt(e.target.value)||0;sNSkills(ns)}}/></div>})}
 </div>
 <div style={{fontSize:8,fontWeight:700,marginTop:2}}>Оружие ({nweapons.length})</div>
 {nweapons.map(function(w,i){return <div key={i} style={{display:"flex",alignItems:"center",gap:3,fontSize:8,padding:"2px 4px",background:"#1d1a14",border:"1px solid #322d24",borderRadius:4}}><span style={{flex:1,fontWeight:600}}>{w.name} {w.dice} {w.dmgType} +{w.bonus}</span><button onClick={function(){sNWeapons(nweapons.filter(function(x,j){return j!==i}))}} style={{background:"none",border:"none",color:"#ef4444",cursor:"pointer",fontSize:8}}>✕</button></div>})}

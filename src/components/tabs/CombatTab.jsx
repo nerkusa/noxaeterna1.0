@@ -34,6 +34,7 @@ function startEditW(w){sEditWId(w.id);sEditWn(w.name);sEditWdi(w.dmgDice||"1d6")
 function saveEditW(){if(!editWId)return;sv(Object.assign({},c,{weapons:(c.weapons||[]).map(function(w){return w.id===editWId?Object.assign({},w,{name:editWn,dmgDice:editWdi,dmgType:editWdt,type:editWt,bonus:editWb}):w})}));sEditWId(null);}
 var _tgt=useState(null);var tgtId=_tgt[0];var sTgt=_tgt[1];
 var _zone=useState("Торс");var selZone=_zone[0];var sZone=_zone[1];
+var _mint=useState("");var mInt=_mint[0];var sMInt=_mint[1];
 var spawned=pr.spawned||{};var saveSpawned=pr.saveSpawned;
 var spawnedArr=Object.entries(spawned).filter(function(e){var hp=e[1].hp!==undefined?e[1].hp:e[1].maxHp;return hp>0});
 var tgtNpc=tgtId?spawned[tgtId]:null;
@@ -110,10 +111,13 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 <div style={{display:"flex",gap:3}}>
 <button onClick={function(){var d=r1(6);var z=ZONES[d-1];sZone(z.name);pr.addLog({who:c.name||"???",type:"zone",label:z.e+" "+z.name+" ×"+z.mult,detail:"1d6="+d,total:d});oR({label:"🎯 Зона",d10:d,parts:[],total:d,subtext:z.e+" "+z.name+" ×"+z.mult+(z.ignoreArmor?" (игнор брони)":"")})}} style={{flex:1,padding:7,borderRadius:7,border:"2px solid #f59e0b28",background:"#231b08",cursor:"pointer",fontWeight:700,fontSize:10,color:"#f0b352"}}>🎯 Зона</button>
 <button onClick={function(){var R=rollHit();var d=R.d;var dv=fs.DEX||0;var dg=es.Dodge||0;var t=d+dv+dg;pr.addLog({who:c.name||"???",type:"dodge",label:"🛡️ Уклонение"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + DEX("+dv+") + Dodge("+dg+") = "+t,total:t});oR({label:"🛡️ Уклонение",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"DEX",value:dv},{label:"Dodge",value:dg}],total:t})}} style={{flex:1,padding:7,borderRadius:7,border:"2px solid #10b98128",background:"#0e2018",cursor:"pointer",fontWeight:700,fontSize:10,color:"#34d399"}}>🛡️ Уклон.</button>
+<button onClick={function(){var R=rollHit();var d=R.d;var wv=fs.WILL||0;var mr=es["Magic Resist"]||0;var t=d+wv+mr;pr.addLog({who:c.name||"???",type:"magic",label:"✨ Сопр. чуду"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + WILL("+wv+") + Miracle Resist("+mr+") = "+t,total:t});oR({label:"✨ Сопротивление чуду",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"WILL",value:wv},{label:"M.Resist",value:mr}],total:t})}} style={{flex:1,padding:7,borderRadius:7,border:"2px solid #7c3aed28",background:"#1f1330",cursor:"pointer",fontWeight:700,fontSize:10,color:"#a78bfa"}}>✨ Сопр.</button>
 </div>
 
 {/* Чувствительный */}
-{pf.id==="sensitive"&&<button onClick={function(){
+{pf.id==="sensitive"&&<div style={{display:"flex",flexDirection:"column",gap:3}}>
+<input value={mInt} onChange={function(e){sMInt(e.target.value)}} placeholder="Опиши чудо: «Создал фаербол и метнул…»" style={Object.assign({},S.inp,{fontSize:9,padding:5,border:"2px solid #7c3aed28"})}/>
+<button onClick={function(){
   if(curW<=0){alert("Нет WILL!");return}
   sv(Object.assign({},c,{curWill:curW-1}));
   var dmg=rN(3,12);var dT=sm(dmg);var bon=rN(1,6);var bT=sm(bon);var extraD6=c.sensitiveBonus?r1(6):0;var ft=dT+bT+extraD6;
@@ -123,15 +127,15 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
     if(tgtNpc&&tgtId&&saveSpawned){
       applyDmgToNpc(tgtNpc,ft,"Д",selZone,saveSpawned,spawned,tgtId,pr.addLog,c.name||"???",pr.onNpcDeath,"🔮 Заклинание",pr.saveNpcHit);
     }
-    sub="✨ ПОПАД! "+ft+"\n−1 WILL"+(tgtNpc?" → "+tgtNpc.name:" (нет цели)");
-    pr.addLog({who:c.name||"???",type:"magic",label:"🔮 Заклинание ПОПАД!"+(tgtNpc?" → "+tgtNpc.name:""),detail:"3d12+1d6="+ft,total:ft});
+    sub=(mInt?"«"+mInt+"»\n":"")+"✨ ПОПАД! "+ft+"\n−1 WILL"+(tgtNpc?" → "+tgtNpc.name:" (нет цели)");
+    pr.addLog({who:c.name||"???",type:"magic",label:"✨ "+(mInt||"Чудо")+" — ПОПАД!"+(tgtNpc?" → "+tgtNpc.name:""),detail:"3d12+1d6="+ft,total:ft});
   } else {
     var cat2=r1(2);
     if(cat2===1){
       /* Обратный — урон себе, сбросить бонус */
       sv(Object.assign({},c,{curHp:Math.max(0,curHp-ft),curWill:Math.max(0,curW-1),sensitiveBonus:false}));
       sub="💥 ОБРАТНЫЙ! "+ft+" урона СЕБЕ\n−1 WILL";
-      pr.addLog({who:c.name||"???",type:"magic_fail",label:"💥 Обратный! Урон себе: "+ft,detail:"",total:ft});
+      pr.addLog({who:c.name||"???",type:"magic_fail",label:"💥 "+(mInt||"Чудо")+" — Обратный! Урон себе: "+ft,detail:"",total:ft});
     } else {
       /* Дружественный — урон случайному активному союзнику */
       var actAllies=(pr.characters||[]).filter(function(x){return x._fbId!==c._fbId&&x.active});
@@ -150,8 +154,9 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
       pr.addLog({who:c.name||"???",type:"magic_fail",label:"🔥 Дружественный огонь!"+(ally?" → "+ally.name:""),detail:"Урон: "+ft,total:ft});
     }
   }
-  oR({label:"🔮 Закл.",d10:hit,parts:[{label:"3d12",value:dT},{label:"1d6",value:bT}],total:ft,subtext:sub});
-}} style={{padding:7,borderRadius:7,border:"2px solid #7c3aed20",background:"#1f1330",cursor:"pointer",fontWeight:700,fontSize:10,color:"#7c3aed"}}>{"🔮 Закл. (−1W) "+(curW<=0?"⛔":"")+(tgtNpc?" → "+tgtNpc.name:"")}</button>}
+  oR({label:mInt||"🔮 Чудо",d10:hit,parts:[{label:"3d12",value:dT},{label:"1d6",value:bT}],total:ft,subtext:sub});
+  sMInt("");
+}} style={{padding:7,borderRadius:7,border:"2px solid #7c3aed20",background:"#1f1330",cursor:"pointer",fontWeight:700,fontSize:10,color:"#a78bfa"}}>{"✨ Сотворить чудо (−1W) "+(curW<=0?"⛔":"")+(tgtNpc?" → "+tgtNpc.name:"")}</button></div>}
 
 {/* Оружие */}
 <div style={{background:"#262219",border:"2px solid #f59e0b18",borderRadius:9,padding:"7px 8px"}}>
