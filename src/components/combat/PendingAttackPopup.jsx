@@ -19,17 +19,22 @@ function PendingAttackPopup(pr){
   var atkD=atk.atkD||"?";var atkREF=atk.atkREF||0;var atkSkill=atk.atkSkill||0;
   var atkBonus=atk.atkBonus||0;var atkSkillName=atk.atkSkillName||"Навык";
   var dodgeDetail=atk.dodgeDetail||"";
+  var isMagic=!!atk.magic;
   function doDodge(){
-    var R=rollHit();var d=R.d;var dv=fs.DEX||0;var dg=es.Dodge||0;var t=d+dv+dg;
+    var R=rollHit();var d=R.d;
+    var dv=isMagic?(fs.WILL||0):(fs.DEX||0);
+    var dg=isMagic?(es["Magic Resist"]||0):(es.Dodge||0);
+    var t=d+dv+dg;
+    var det=isMagic?("d10("+d+")+WILL("+dv+")+M.Resist("+dg+")="+t):("d10("+d+")+DEX("+dv+")+Dodge("+dg+")="+t);
     var dodgedNow=t>=atk.hitRoll;
     if(dodgedNow){
-      /* Уклонился — ставим статус "dodged", ГМ видит результат с кнопкой Закрыть */
-      update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:t,dodgeDetail:"d10("+d+")+DEX("+dv+")+Dodge("+dg+")="+t,status:"dodged"});
-      addLog({who:myChar.name||"???",type:"dodge",label:"✅ Уклонился от "+atk.attackerName,detail:"d10("+d+")+DEX("+dv+")+Dodge("+dg+")="+t+" vs "+atk.hitRoll,total:t});
+      /* Успех — ставим статус "dodged", ГМ видит результат с кнопкой Закрыть */
+      update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:t,dodgeDetail:det,status:"dodged"});
+      addLog({who:myChar.name||"???",type:isMagic?"magic":"dodge",label:(isMagic?"✨ Устоял против чуда — ":"✅ Уклонился от ")+atk.attackerName,detail:det+" vs "+atk.hitRoll,total:t});
     } else {
-      /* Не уклонился — переходим в фазу выбора щита */
-      update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:t,dodgeDetail:"d10("+d+")+DEX("+dv+")+Dodge("+dg+")="+t,status:"pending_shield"});
-      addLog({who:myChar.name||"???",type:"dodge",label:"❌ Не уклонился от "+atk.attackerName,detail:"d10("+d+")+DEX("+dv+")+Dodge("+dg+")="+t+" vs "+atk.hitRoll,total:t});
+      /* Не защитился — переходим в фазу выбора щита */
+      update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:t,dodgeDetail:det,status:"pending_shield"});
+      addLog({who:myChar.name||"???",type:isMagic?"magic_fail":"dodge",label:(isMagic?"❌ Не устоял против чуда — ":"❌ Не уклонился от ")+atk.attackerName,detail:det+" vs "+atk.hitRoll,total:t});
     }
   }
   function acceptHit(){
@@ -60,11 +65,11 @@ function PendingAttackPopup(pr){
       </div>
       {/* Уклонение — кнопка или результат */}
       <div style={{background:"#262219",border:"1px solid "+(waiting?"#3a3429":shieldPhase?"#38bdf840":"#10b98140"),borderRadius:10,padding:"8px 12px",marginBottom:waiting?10:0}}>
-        <div style={{fontSize:8,color:"#9a8f7c",marginBottom:4}}>Твоё уклонение</div>
+        <div style={{fontSize:8,color:"#9a8f7c",marginBottom:4}}>{isMagic?"✨ Сопротивление чуду":"Твоё уклонение"}</div>
         {waiting
           ?<div>
-            <div style={{fontSize:9,color:"#a89a82",marginBottom:8}}>d10 + DEX({fs.DEX||0}) + Dodge({es.Dodge||0})</div>
-            <button onClick={doDodge} style={{width:"100%",padding:"10px",borderRadius:9,border:"none",background:"#10b981",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,cursor:"pointer",marginBottom:6}}>🛡️ Уклониться!</button>
+            <div style={{fontSize:9,color:"#a89a82",marginBottom:8}}>{isMagic?("d10 + WILL("+(fs.WILL||0)+") + Miracle Resist("+(es["Magic Resist"]||0)+")"):("d10 + DEX("+(fs.DEX||0)+") + Dodge("+(es.Dodge||0)+")")}</div>
+            <button onClick={doDodge} style={{width:"100%",padding:"10px",borderRadius:9,border:"none",background:isMagic?"#7c3aed":"#10b981",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,cursor:"pointer",marginBottom:6}}>{isMagic?"✨ Сопротивляться чуду!":"🛡️ Уклониться!"}</button>
             <button onClick={acceptHit} style={{width:"100%",padding:6,borderRadius:7,border:"2px solid #ef444440",background:"none",color:"#ef4444",fontWeight:700,fontSize:10,cursor:"pointer"}}>Принять удар</button>
           </div>
           :<div>
