@@ -4,6 +4,7 @@ import { cF, mHP } from '../../utils/character';
 import BestiaryEditor from './BestiaryEditor';
 import DonatePage from './DonatePage';
 import GameView from '../GameView';
+import GMRoll from './GMRoll';
 import LoreEditor from './LoreEditor';
 import ProfEditor from './ProfEditor';
 import RaceEditor from './RaceEditor';
@@ -24,6 +25,7 @@ return(<div style={{flex:1,display:"flex",flexDirection:"column"}}><div style={{
 <button onClick={function(){sRV(true)}} style={{width:"100%",padding:10,borderRadius:9,border:"2px solid #10b98140",background:"#0e2018",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#34d399",cursor:"pointer"}}>🧬 Расы</button>
 <button onClick={function(){sPE(true)}} style={{width:"100%",padding:10,borderRadius:9,border:"2px solid #a78bfa40",background:"#1f1330",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#a78bfa",cursor:"pointer"}}>🎭 Классы</button>
 <button onClick={function(){sShp(true)}} style={{width:"100%",padding:10,borderRadius:9,border:"2px solid #f59e0b40",background:"#2a2008",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#f0b352",cursor:"pointer"}}>🛒 Магазин / Вещи</button>
+<GMRoll addLog={pr.addLog}/>
 {pr.characters.length===0&&<div style={{textAlign:"center",padding:20,color:"#a89a82"}}>Ожидаем...</div>}
 {pr.characters.map(function(c){var inf=cF(c);var pf=getProfs().find(function(p){return p.id===c.profId})||getProfs()[0];var mx=c.hpOv||mHP(inf.fs);var ch=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx;return(<div key={c._fbId} style={{background:"#1d1a14",border:"2px solid #c084fc18",borderRadius:9,padding:"7px 9px"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}><span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12}}>{c.name||"?"} <span style={{fontSize:8,color:"#a89a82"}}>{pf.name} Ур.{c.level}</span>{c.active&&<span style={{fontSize:7,background:"#10b981",color:"#fff",borderRadius:3,padding:"1px 4px",marginLeft:4}}>В ИГРЕ</span>}</span><div style={{display:"flex",gap:2}}><button onClick={function(){pr.saveChar(c._fbId,Object.assign({},c,{active:!c.active}))}} style={{padding:"3px 7px",borderRadius:5,border:"1px solid "+(c.active?"#10b98140":"#322d24"),background:c.active?"#0e2018":"#1d1a14",fontWeight:700,fontSize:8,color:c.active?"#34d399":"#a89a82",cursor:"pointer"}}>{c.active?"✓ Активен":"В игру"}</button><button onClick={function(){sS(c._fbId)}} style={{padding:"3px 8px",borderRadius:5,border:"1px solid #7c3aed28",background:"#1f1330",fontWeight:700,fontSize:9,color:"#7c3aed",cursor:"pointer"}}>Открыть</button></div></div>
 <div style={{fontSize:9}}>{"❤️ "+ch+"/"+mx+" 🔥 "+(inf.fs.WILL||0)}</div>
