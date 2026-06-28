@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { db, ref, set } from '../../firebase';
 import { ZONES } from '../../data/combat';
-import { PROFS } from '../../data/professions';
+import { getProfs } from '../../utils/profStore';
 import { DT, WS, WT } from '../../data/stats';
 import { S } from '../../styles/ui';
 import { cF, mHP } from '../../utils/character';
@@ -14,7 +14,7 @@ import InitiativeBar from '../combat/InitiativeBar';
 
 function CombatTab(pr){
 var c=pr.char;var sv=pr.save;var oR=pr.onRoll;var inf=cF(c);var fs=inf.fs;var es=inf.eSk;
-var pf=PROFS.find(function(p){return p.id===c.profId})||PROFS[0];
+var pf=getProfs().find(function(p){return p.id===c.profId})||getProfs()[0];
 var _sa=useState(false);var sa=_sa[0];var sSA=_sa[1];
 var _wn=useState("");var wn=_wn[0];var sWN=_wn[1];
 var _wt=useState("Battle");var wt=_wt[0];var sWT=_wt[1];
