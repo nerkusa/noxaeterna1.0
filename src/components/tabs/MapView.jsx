@@ -15,6 +15,7 @@ var mapSwitch=(<div style={{display:"flex",gap:4,marginBottom:2}}>
 var _dr=useState(null);var drId=_dr[0];var sDrId=_dr[1];
 var _off=useState({x:0,y:0});var drOff=_off[0];var sDrOff=_off[1];
 var _live=useState(null);var liveT=_live[0];var sLiveT=_live[1];
+var _pan=useState(null);var pan=_pan[0];var sPan=_pan[1];
 var _sn=useState(false);var sn=_sn[0];var sSN=_sn[1];
 var _nn=useState("");var nn=_nn[0];var sNN=_nn[1];
 var _nc=useState("#ef4444");var nc=_nc[0];var sNC=_nc[1];
@@ -47,9 +48,14 @@ function toPct(e){
     y:Math.max(0,Math.min(100,((cy-r.top)/r.height)*100))
   };
 }
-function startDr(e,t){if(!canDr(t))return;e.preventDefault();var p=toPct(e);if(!p)return;sDrId(t.id);sDrOff({x:p.x-t.x,y:p.y-t.y});sLiveT(tokens.slice())}
-function onMv(e){if(!drId)return;e.preventDefault();var p=toPct(e);if(!p)return;sLiveT((liveT||tokens).map(function(t){return t.id===drId?Object.assign({},t,{x:Math.max(0,Math.min(100,p.x-drOff.x)),y:Math.max(0,Math.min(100,p.y-drOff.y))}):t}))}
-function endDr(){if(drId&&liveT){saveTk(liveT);}sDrId(null);sLiveT(null)}
+function startDr(e,t){if(!canDr(t))return;e.preventDefault();e.stopPropagation();sDrId(t.id);var p=toPct(e);if(!p)return;sDrOff({x:p.x-t.x,y:p.y-t.y});sLiveT(tokens.slice())}
+/* Панорама: зажал ЛКМ на пустом месте карты — тащишь весь холст (scroll) */
+function startPan(e){if(drId)return;var el=contRef.current;if(!el)return;var cx=e.touches?e.touches[0].clientX:e.clientX;var cy=e.touches?e.touches[0].clientY:e.clientY;sPan({x:cx,y:cy,sl:el.scrollLeft,st:el.scrollTop})}
+function onMv(e){
+  if(drId){e.preventDefault();var p=toPct(e);if(!p)return;sLiveT((liveT||tokens).map(function(t){return t.id===drId?Object.assign({},t,{x:Math.max(0,Math.min(100,p.x-drOff.x)),y:Math.max(0,Math.min(100,p.y-drOff.y))}):t}));return}
+  if(pan){var el=contRef.current;if(!el)return;var cx=e.touches?e.touches[0].clientX:e.clientX;var cy=e.touches?e.touches[0].clientY:e.clientY;el.scrollLeft=pan.sl-(cx-pan.x);el.scrollTop=pan.st-(cy-pan.y)}
+}
+function endDr(){if(drId&&liveT){saveTk(liveT);}sDrId(null);sLiveT(null);sPan(null)}
 if(!img)return <div style={{display:"flex",flexDirection:"column",gap:6}}>{mapSwitch}<div style={{textAlign:"center",padding:"24px 10px"}}><div style={{fontSize:40}}>🗺️</div><div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14}}>{isWorld?"Масштабная карта (1:1)":"Локальная карта"}</div>{isGM?<label style={{display:"inline-block",marginTop:10,padding:"10px 20px",borderRadius:8,border:"2px dashed #10b981",background:"#0e2018",fontWeight:700,fontSize:12,color:"#34d399",cursor:"pointer"}}>📁 Загрузить карту<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setImg(ev.target.result)};r.readAsDataURL(f)}}/></label>:<div style={{fontSize:10,color:"#a89a82",marginTop:8}}>Мастер ещё не загрузил карту</div>}</div></div>;
 return <div style={{display:"flex",flexDirection:"column",gap:6}}>
 {mapSwitch}
@@ -62,8 +68,8 @@ return <div style={{display:"flex",flexDirection:"column",gap:6}}>
     <button onClick={function(){sZoom(1)}} style={{padding:"2px 6px",borderRadius:5,border:"1px solid #322d24",background:"#1d1a14",fontSize:8,cursor:"pointer",color:"#a89a82"}}>1:1</button>
   </div>
 </div>
-<div style={{fontSize:8,color:"#7c715a",textAlign:"right",marginTop:-4}}>колесо мыши — зум, тащи жетон — двигать</div>
-<div ref={contRef} style={{overflow:"auto",borderRadius:10,border:"2px solid #322d24",background:"#1a1a2e",maxHeight:500,touchAction:"none",userSelect:"none"}} onMouseMove={onMv} onMouseUp={endDr} onMouseLeave={endDr} onTouchMove={onMv} onTouchEnd={endDr}>
+<div style={{fontSize:8,color:"#7c715a",textAlign:"right",marginTop:-4}}>колесо — зум · ЛКМ по карте — двигать карту · тащи жетон — двигать жетон</div>
+<div ref={contRef} style={{overflow:"auto",borderRadius:10,border:"2px solid #322d24",background:"#1a1a2e",maxHeight:500,touchAction:"none",userSelect:"none",cursor:pan?"grabbing":"grab"}} onMouseDown={startPan} onTouchStart={startPan} onMouseMove={onMv} onMouseUp={endDr} onMouseLeave={endDr} onTouchMove={onMv} onTouchEnd={endDr}>
   {/* Единственный контейнер — картинка с position:relative, токены absolute внутри неё */}
   <div style={{position:"relative",display:"inline-block",lineHeight:0}}>
     <img ref={function(el){sImgEl(el)}} src={img}
