@@ -79,7 +79,7 @@ function PlayerAttackNotif(pr){
   function acceptHit(){
     update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:0,status:"pending_dmg"});
   }
-  var atkD2=atk.atkD||"?";var atkREF2=atk.atkREF||0;var atkSkill2=atk.atkSkill||0;var atkBonus2=atk.atkBonus||0;var atkSkillName2=atk.atkSkillName||"Навык";
+  var atkD2=atk.atkD||"?";var atkREF2=atk.atkREF||0;var atkStat2=atk.atkStatName||"REF";var atkSkill2=atk.atkSkill||0;var atkBonus2=atk.atkBonus||0;var atkSkillName2=atk.atkSkillName||"Навык";
   var npcDex=npc?(npc.stats||{}).DEX||0:0;var npcDodge=npc?(npc.skills||{}).dodge||0:0;
   var npcWill=npc?(npc.stats||{}).WILL||0:0;var npcMR=npc?(npc.skills||{}).mresist||0:0;
   var accent=isMag?"#a78bfa":"#3b82f6";
@@ -96,7 +96,7 @@ function PlayerAttackNotif(pr){
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,flexWrap:"wrap",marginBottom:6}}>
           <span style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:900,color:atkD2===10?"#d97706":atkD2===1?"#dc2626":"#3b82f6"}}>{"🎲"+atkD2}</span>
           <span style={{color:"#a89a82"}}>+</span>
-          <span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>REF</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkREF2}</span></span>
+          <span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>{atkStat2}</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkREF2}</span></span>
           <span style={{color:"#a89a82"}}>+</span>
           <span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>{atkSkillName2}</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkSkill2}</span></span>
           {atkBonus2!==0&&<span style={{color:"#a89a82"}}>+</span>}

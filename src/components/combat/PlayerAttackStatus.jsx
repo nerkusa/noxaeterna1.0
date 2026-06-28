@@ -17,7 +17,7 @@ function PlayerAttackStatus(pr){
   var entry=mine[0];var id=entry[0];var atk=entry[1];
   var waiting=atk.status==="pending_dodge";var shieldPhaseGM=atk.status==="pending_shield";
   var dodged=atk.status==="dodged";
-  var atkD=atk.atkD||"?";var atkREF=atk.atkREF||0;var atkSkill=atk.atkSkill||0;
+  var atkD=atk.atkD||"?";var atkREF=atk.atkREF||0;var atkStat=atk.atkStatName||"REF";var atkSkill=atk.atkSkill||0;
   var atkBonus=atk.atkBonus||0;var atkSkillName=atk.atkSkillName||"Навык";
   var dodgeDetail=atk.dodgeDetail||"";
   var isMag=!!atk.magic;
@@ -32,7 +32,7 @@ function PlayerAttackStatus(pr){
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,flexWrap:"wrap",marginBottom:6}}>
           <span style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:900,color:atkD===10?"#d97706":atkD===1?"#dc2626":"#3b82f6"}}>{"🎲"+atkD}</span>
           <span style={{color:"#a89a82"}}>+</span>
-          <span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>REF</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkREF}</span></span>
+          <span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>{atkStat}</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkREF}</span></span>
           <span style={{color:"#a89a82"}}>+</span>
           <span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>{atkSkillName}</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkSkill}</span></span>
           {atkBonus!==0&&<span style={{color:"#a89a82"}}>+</span>}
