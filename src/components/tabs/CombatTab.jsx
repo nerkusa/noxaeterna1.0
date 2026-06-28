@@ -56,7 +56,7 @@ return(<div style={{display:"flex",flexDirection:"column",gap:8}}>
 <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11}}>🔥 WILL</span>
 <div style={{display:"flex",alignItems:"center",gap:2}}><button onClick={function(){sv(Object.assign({},c,{curWill:Math.max(0,curW-1)}))}} style={S.sm}>−</button><span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#8b5cf6"}}>{curW+"/"+mxW}</span><button onClick={function(){sv(Object.assign({},c,{curWill:Math.min(mxW,curW+1)}))}} style={S.sm}>+</button></div>
 </div>
-<button onClick={function(){sv(Object.assign({},c,{curHp:mx,curWill:mxW,warriorBonus:false,warriorBonusUsed:false,sensitiveBonus:false,merchantUsed:false}));pr.addLog({who:c.name||"???",type:"rest",label:"💤 Отдых — способности восстановлены",detail:"",total:0})}} style={{padding:"5px 10px",borderRadius:9,border:"2px solid #10b98120",background:"#0e2018",fontWeight:700,fontSize:10,color:"#34d399",cursor:"pointer"}}>💤</button>
+<button onClick={function(){sv(Object.assign({},c,{curHp:mx,curWill:mxW,warriorBonus:false,warriorBonusUsed:false,sensitiveBonus:false,customStance:false,merchantUsed:false}));pr.addLog({who:c.name||"???",type:"rest",label:"💤 Отдых — способности восстановлены",detail:"",total:0})}} style={{padding:"5px 10px",borderRadius:9,border:"2px solid #10b98120",background:"#0e2018",fontWeight:700,fontSize:10,color:"#34d399",cursor:"pointer"}}>💤</button>
 </div>
 
 {/* Броня игрока */}
@@ -103,6 +103,27 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
       <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:"#7c3aed",marginBottom:4}}>🔮 Хаотический Всплеск</div>
       <div style={{fontSize:8,color:"#9a8f7c",marginBottom:6}}>{senActive?"+1d6 к заклинаниям активен (до провала)":"Добавляет +1d6 к урону заклинаний до первой неудачи"}</div>
       <button onClick={function(){sv(Object.assign({},c,{sensitiveBonus:!senActive}))}} style={{width:"100%",padding:"6px",borderRadius:7,border:"none",background:senActive?"#10b981":"#7c3aed",color:"#fff",fontWeight:700,fontSize:10,cursor:"pointer"}}>{senActive?"🟢 +1d6 активен — нажать чтобы снять":"🔮 Активировать Хаот. Всплеск"}</button>
+    </div>);
+  }
+  if(pf.id!=="none"&&pf.abilityType==="bonus_attack"){
+    var cbActive=c.warriorBonus;
+    var cbUsed=c.warriorBonusUsed;
+    return(<div style={{background:"#231b08",border:"2px solid #f59e0b28",borderRadius:9,padding:"7px 9px"}}>
+      <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:"#f0b352",marginBottom:4}}>⚔️ {pf.abN||"Способность"}</div>
+      <div style={{fontSize:8,color:"#9a8f7c",marginBottom:6}}>{pf.abilityDesc||(cbActive?"Активна — следующая атака +5":"Один раз в день: +5 к атаке в одном ходу")}</div>
+      <div style={{display:"flex",gap:4}}>
+        <button disabled={cbUsed} onClick={function(){sv(Object.assign({},c,{warriorBonus:true,warriorBonusUsed:true}))}} style={{flex:1,padding:"6px",borderRadius:7,border:"none",background:cbUsed?"#322d24":cbActive?"#10b981":"#f59e0b",color:cbUsed?"#8d8270":"#fff",fontWeight:700,fontSize:10,cursor:cbUsed?"not-allowed":"pointer"}}>{cbUsed?(cbActive?"⚔️ +5 активен":"✓ Использовано сегодня"):"⚔️ Активировать +5"}</button>
+        {cbActive&&<button onClick={function(){sv(Object.assign({},c,{warriorBonus:false}))}} style={{padding:"6px 10px",borderRadius:7,border:"1px solid #322d24",background:"#1d1a14",fontSize:9,cursor:"pointer",color:"#a89a82"}}>Снять</button>}
+        {cbUsed&&<button onClick={function(){sv(Object.assign({},c,{warriorBonus:false,warriorBonusUsed:false}))}} title="Сбросить (новый день)" style={{padding:"6px 8px",borderRadius:7,border:"1px solid #322d24",background:"#1d1a14",fontSize:9,cursor:"pointer",color:"#a89a82"}}>🔄</button>}
+      </div>
+    </div>);
+  }
+  if(pf.id!=="none"&&pf.abilityType==="toggle"){
+    var stOn=c.customStance;
+    return(<div style={{background:"#1f1330",border:"2px solid #a78bfa28",borderRadius:9,padding:"7px 9px"}}>
+      <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:"#a78bfa",marginBottom:4}}>🔮 {pf.abN||"Способность"}</div>
+      <div style={{fontSize:8,color:"#9a8f7c",marginBottom:6}}>{pf.abilityDesc||"Переключатель режима"}{stOn?" — сейчас активно":""}</div>
+      <button onClick={function(){sv(Object.assign({},c,{customStance:!stOn}))}} style={{width:"100%",padding:"6px",borderRadius:7,border:"none",background:stOn?"#10b981":"#7c3aed",color:"#fff",fontWeight:700,fontSize:10,cursor:"pointer"}}>{stOn?"🟢 Активно — нажми чтобы выключить":"🔮 Включить"}</button>
     </div>);
   }
   return null;
@@ -191,14 +212,14 @@ return(<div key={w.id} style={{background:isEq?"#0e2018":"#1d1a14",border:"1px s
 <button onClick={function(){var upd={weaponMode:"2h"};if(c.equippedShield)upd.equippedShield=null;sv(Object.assign({},c,upd));}} style={{flex:1,padding:"2px 0",borderRadius:4,border:curMode==="2h"?"2px solid #3b82f6":"1px solid #322d24",background:curMode==="2h"?"#0e1a2b":"#1d1a14",fontSize:8,fontWeight:curMode==="2h"?700:400,cursor:"pointer",color:curMode==="2h"?"#60a5fa":"#b3a890"}}>2 руки · {w.dmgDice2h||w.dmgDice}{w.bonus2h!==undefined?" +"+w.bonus2h:""}</button>
 </div>}
 <div style={{display:"flex",gap:3}}>
-<button onClick={function(){var R=rollHit();var d=R.d;var rv=fs.REF||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&pf.id==="warrior")?5:0;if(warBon)sv(Object.assign({},c,{warriorBonus:false}));var t=d+rv+sv2+(w.bonus||0)+warBon;pr.addLog({who:c.name||"???",type:"hit",label:"🎯 "+w.name+(tgtNpc?" → "+tgtNpc.name:"")+(warBon?" ⚔️+5":"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + REF("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+") = "+t,total:t});
+<button onClick={function(){var R=rollHit();var d=R.d;var rv=fs.REF||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&(pf.id==="warrior"||pf.abilityType==="bonus_attack"))?5:0;if(warBon)sv(Object.assign({},c,{warriorBonus:false}));var t=d+rv+sv2+(w.bonus||0)+warBon;pr.addLog({who:c.name||"???",type:"hit",label:"🎯 "+w.name+(tgtNpc?" → "+tgtNpc.name:"")+(warBon?" ⚔️+5":"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + REF("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+") = "+t,total:t});
 if(tgtNpc&&tgtId&&pr.savePendingAttack){pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:t,atkD:d,atkREF:rv,atkSkill:sv2,atkSkillName:sk,atkBonus:w.bonus||0,weaponName:w.name,dmgDice:activeDice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:activeBon,zone:selZone,status:"pending_dodge",ts:Date.now()});}
 else{oR({label:w.name+" Попад.",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"REF",value:rv},{label:sk,value:sv2},{label:"Бнс",value:w.bonus||0}],total:t});}}}
  style={{flex:1,padding:4,borderRadius:5,border:"1px solid #3b82f620",background:"#0e1a2b",cursor:"pointer",fontWeight:700,fontSize:9,color:"#60a5fa",textAlign:"center"}}>{"🎯"+(tgtNpc?" →"+tgtNpc.name.slice(0,8):"")}</button>
 <button onClick={function(){
   var m=activeDice.match(/(\d+)d(\d+)/);if(!m)return;
   var dice=rN(parseInt(m[1]),parseInt(m[2]));
-  var warDmgBon=(c.warriorBonus&&pf.id==="warrior")?5:0;
+  var warDmgBon=(c.warriorBonus&&(pf.id==="warrior"||pf.abilityType==="bonus_attack"))?5:0;
   if(warDmgBon)sv(Object.assign({},c,{warriorBonus:false}));
   var rawDmg=sm(dice)+activeBon+warDmgBon;
   if(tgtNpc&&tgtId&&saveSpawned){
