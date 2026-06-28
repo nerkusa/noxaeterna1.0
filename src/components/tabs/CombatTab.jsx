@@ -42,7 +42,7 @@ var mx=c.hpOv||mHP(fs);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx;
 var mxW=c.willOv||fs.WILL||1;var curW=c.curWill!==null&&c.curWill!==undefined?c.curWill:mxW;
 var hpP=mx>0?(curHp/mx)*100:0;
 var isGM=pr.isGM;
-var visibleLogs=(pr.logs||[]).filter(function(l){return isGM||(l.type!=="dmg_npc"&&l.type!=="spawn")});
+var visibleLogs=(pr.logs||[]).filter(function(l){return isGM||(l.type!=="dmg_npc"&&l.type!=="spawn"&&l.type!=="gm_roll")});
 return(<div style={{display:"flex",flexDirection:"column",gap:8}}>
 {pr.initiative&&<InitiativeBar initiative={pr.initiative}/>}
 <div style={{background:"#2a1414",border:"2px solid #ef444418",borderRadius:9,padding:"7px 9px"}}>
