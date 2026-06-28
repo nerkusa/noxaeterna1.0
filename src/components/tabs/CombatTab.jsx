@@ -140,6 +140,17 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 <input value={mInt} onChange={function(e){sMInt(e.target.value)}} placeholder="Опиши чудо: «Создал фаербол и метнул…»" style={Object.assign({},S.inp,{fontSize:9,padding:5,border:"2px solid #7c3aed28"})}/>
 <button onClick={function(){
   if(curW<=0){alert("Нет WILL!");return}
+  if(tgtNpc&&tgtId&&pr.savePendingAttack){
+    /* Контест против NPC: чудо vs Miracle Resist (как атака) */
+    sv(Object.assign({},c,{curWill:curW-1}));
+    var R=rollHit();var dd=R.d;var wv=fs.WILL||0;var msk=es.Spellcasting||0;var hitC=dd+wv+msk;
+    var cbon=r1(6)+(c.sensitiveBonus?r1(6):0);
+    pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,magic:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:hitC,atkD:dd,atkREF:wv,atkSkill:msk,atkSkillName:"Miracle",atkBonus:0,weaponName:mInt||"Чудо",dmgDice:"3d12",dmgType:"Д",dmgBonus:cbon,zone:selZone,castIntent:mInt||"",status:"pending_dodge",ts:Date.now()});
+    pr.addLog({who:c.name||"???",type:"magic",label:"✨ "+(mInt||"Чудо")+" → "+tgtNpc.name+" (бросок чуда)"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+dd+" + WILL("+wv+") + Miracle("+msk+") = "+hitC,total:hitC});
+    oR({label:mInt||"✨ Чудо",d10:dd,crit:R.crit,fumble:R.fumble,parts:[{label:"WILL",value:wv},{label:"Miracle",value:msk}],total:hitC,subtext:(mInt?"«"+mInt+"»\n":"")+"−1 WILL\n→ "+tgtNpc.name+" сопротивляется Miracle Resist…"});
+    sMInt("");
+    return;
+  }
   sv(Object.assign({},c,{curWill:curW-1}));
   var dmg=rN(3,12);var dT=sm(dmg);var bon=rN(1,6);var bT=sm(bon);var extraD6=c.sensitiveBonus?r1(6):0;var ft=dT+bT+extraD6;
   var hit=r1(6);var ok=hit<=3;var sub="";
