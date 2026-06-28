@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PROFS } from '../../data/professions';
+import { PROFS, PROF_DESC } from '../../data/professions';
 import { SD, SKD, skLabel } from '../../data/stats';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #322d24', background: '#1d1a14', color: '#ece5d8', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
@@ -9,6 +9,7 @@ const CLR = '#a78bfa';
 
 const ATYPES = [
   { id: 'flavor', name: 'Только описание (без механики)' },
+  { id: 'custom_roll', name: '🎲 Кастомный бросок (кость+хар-ка+навык)' },
   { id: 'roll_charisma', name: 'Бросок Charisma +5 (1/день)' },
   { id: 'check', name: 'Проверка d10 ≥ 6' },
   { id: 'bonus_attack', name: '+5 к атаке (актив. в бою)' },
@@ -20,7 +21,12 @@ function genId() { return 'p_' + Date.now().toString(36) + Math.floor(Math.rando
 function normalize(profs) {
   const base = (Array.isArray(profs) && profs.length) ? profs.slice() : PROFS.slice();
   if (!base.find(function (p) { return p.id === 'none'; })) base.unshift(PROFS[0]);
-  return base;
+  /* Подмешиваем встроенные описания, если у профессии их ещё нет — чтобы ГМ видел
+     и мог редактировать реальный текст, а не пустые поля. */
+  return base.map(function (p) {
+    const d = PROF_DESC[p.id] || {};
+    return Object.assign({ desc: d.desc || '', abilityDesc: d.abilityDesc || '', abilityType: d.abilityType || 'flavor' }, p);
+  });
 }
 
 const ALL_SK = Object.keys(SKD).reduce(function (a, k) { return a.concat(SKD[k].map(function (s) { return s.name; })); }, []);
@@ -92,6 +98,18 @@ export default function ProfEditor(pr) {
                   <label style={lbl}>Тип способности</label>
                   <select value={p.abilityType || 'flavor'} onChange={function (e) { upd(p.id, { abilityType: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{ATYPES.map(function (t) { return <option key={t.id} value={t.id}>{t.name}</option>; })}</select>
                 </div>
+                {p.abilityType === 'custom_roll' && (
+                  <div style={{ background: '#1c1530', borderRadius: 6, padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ fontSize: 8, color: '#a78bfa', fontWeight: 700 }}>🎲 Параметры броска — кнопка появится в листе игрока</div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <div style={{ flex: 1 }}><label style={lbl}>Кость</label><input value={p.rollDice || ''} placeholder="1d8" onChange={function (e) { upd(p.id, { rollDice: e.target.value }); }} style={inp} /></div>
+                      <div style={{ width: 64 }}><label style={lbl}>Бонус +</label><input type="number" value={p.rollBonus || 0} onChange={function (e) { upd(p.id, { rollBonus: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
+                    </div>
+                    <div><label style={lbl}>+ Характеристика</label><select value={p.rollStat || ''} onChange={function (e) { upd(p.id, { rollStat: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{SD.map(function (s) { return <option key={s.key} value={s.key}>{s.key + ' · ' + s.full}</option>; })}</select></div>
+                    <div><label style={lbl}>+ Навык</label><select value={p.rollSkill || ''} onChange={function (e) { upd(p.id, { rollSkill: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{ALL_SK.map(function (n) { return <option key={n} value={n}>{skLabel(n)}</option>; })}</select></div>
+                    <div style={{ fontSize: 8, color: '#8d8270' }}>Пример: «1d8 + INT + Lore». Бросает игрок со своими характеристиками.</div>
+                  </div>
+                )}
                 <div>
                   <label style={lbl}>Предпочт. характеристики (для «Рандома»)</label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
@@ -122,7 +140,7 @@ export default function ProfEditor(pr) {
         );
       })}
       <div style={{ fontSize: 9, color: '#a89a82', textAlign: 'center', padding: '4px 8px', fontStyle: 'italic' }}>
-        Все типы способностей работают: «Charisma +5» и «Проверка d10≥6» — кнопки в листе персонажа; «+5 к атаке» (1/день) и «Переключатель» — карточки во вкладке Бой. «— Нет —» удалить нельзя.
+        Все типы способностей работают: «🎲 Кастомный бросок», «Charisma +5» и «Проверка d10≥6» — кнопки в листе персонажа; «+5 к атаке» (1/день) и «Переключатель» — карточки во вкладке Бой. Описания можно править даже у встроенных классов. «— Нет —» удалить нельзя.
       </div>
     </div>
   );
