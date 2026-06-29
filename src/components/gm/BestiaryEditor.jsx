@@ -117,27 +117,34 @@ function npcDmg(s,w){
 /* NPC магия (как Чувствительный): d10, ≤3=попад → урон игроку, >3=обратный или по союзнику NPC */
 function npcMagic(s,npcSpawnId){
   var st=s.stats||{};
-  var will=st.WILL||1;
-  var dmg=rN(3,12);var dT=sm(dmg);var bon=rN(1,6);var bT=sm(bon);var ft=dT+bT;
-  var hit=r1(6);var ok=hit<=3;
-  var ptgt=playerTgtId?playerChars.find(function(x){return x._fbId===playerTgtId}):null;
-  var sub="";
-  if(ok){
-    if(ptgt){applyDmgToPlayer(ptgt,ft,"Д",playerZone,s.name);}
-    sub="✨ ПОПАД! "+ft+(ptgt?" → "+ptgt.name:"");
-    pr.addLog({who:s.name,type:"magic",label:"🔮 Заклинание ПОПАД!"+(ptgt?" → "+ptgt.name:""),detail:"3d12+1d6="+ft,total:ft});
-  } else {
-    var cat2=r1(2);
-    sub=(cat2===1?"💥 ОБРАТНЫЙ! ":"🔥 ДРУЖЕСТВ! ")+ft;
-    pr.addLog({who:s.name,type:"magic_fail",label:cat2===1?"💥 Обратный урон себе: "+ft:"🔥 Дружественный огонь: "+ft,detail:"",total:ft});
-    if(cat2===1){
-      /* Обратный — урон самому NPC */
+  var cbon=sm(rN(1,6));
+  var ft=sm(rN(3,12))+cbon;
+  var cc=r1(6);
+  if(cc<=3){
+    /* Срыв каста: 1-2 по себе, 3 по случайному союзнику-NPC */
+    if(cc<=2){
       var sp2=Object.assign({},pr.spawned||{});
       sp2[npcSpawnId]=Object.assign({},s,{hp:Math.max(0,(s.hp||0)-ft)});
       pr.saveSpawned(sp2);
+      pr.addLog({who:s.name,type:"magic_fail",label:"💥 "+s.name+" — срыв магии (d6="+cc+")! Удар по СЕБЕ: "+ft,detail:"",total:ft});
+      sRollP({label:s.name+" 🔮 Срыв",d10:null,parts:[{label:"d6",value:cc}],total:ft,subtext:"💥 По себе: "+ft});
+    } else {
+      var others=Object.entries(pr.spawned||{}).filter(function(e){return e[0]!==npcSpawnId&&((e[1].hp!==undefined?e[1].hp:e[1].maxHp)>0)});
+      if(others.length){var oe=others[Math.floor(Math.random()*others.length)];var oid=oe[0];var os=oe[1];var sp3=Object.assign({},pr.spawned||{});sp3[oid]=Object.assign({},os,{hp:Math.max(0,(os.hp||0)-ft)});pr.saveSpawned(sp3);pr.addLog({who:s.name,type:"magic_fail",label:"🔥 "+s.name+" — срыв магии (d6=3)! По союзнику "+os.name+": "+ft,detail:"",total:ft});sRollP({label:s.name+" 🔮 Срыв",d10:null,parts:[{label:"d6",value:cc}],total:ft,subtext:"🔥 По союзнику "+os.name+": "+ft});}
+      else{pr.addLog({who:s.name,type:"magic_fail",label:"🔥 "+s.name+" — срыв магии (d6=3), но союзников нет",detail:"",total:0});sRollP({label:s.name+" 🔮 Срыв",d10:null,parts:[{label:"d6",value:cc}],total:0,subtext:"🔥 Срыв — союзников рядом нет"});}
     }
+    return;
   }
-  sRollP({label:s.name+" 🔮 Заклинание",d10:hit,parts:[{label:"3d12",value:dT},{label:"1d6",value:bT}],total:ft,subtext:sub});
+  /* Каст удался (d6 4-6) — игрок кидает Miracle Resist */
+  var will=st.WILL||0;var msk=(s.skills||{}).spellcast||0;var R=rollHit();var hitC=R.d+will+msk;
+  var tgtChar=playerTgtId?playerChars.find(function(x){return x._fbId===playerTgtId}):null;
+  var tgtName=tgtChar?tgtChar.name:"";
+  pr.addLog({who:s.name,type:"magic",label:"🔮 "+s.name+" — чудо удалось (d6="+cc+")"+(tgtName?" → "+tgtName:"")+(R.crit?" 🌟КРИТ":""),detail:"🎲"+R.d+" + WILL("+will+") + Miracle("+msk+") = "+hitC,total:hitC});
+  if(playerTgtId&&pr.savePendingAttack){
+    pr.savePendingAttack({id:"atk_"+Date.now(),attackerName:s.name,targetId:playerTgtId,targetName:tgtName,hitRoll:hitC,atkD:R.d,atkREF:will,atkStatName:"WILL",atkSkill:msk,atkSkillName:"Miracle",atkBonus:0,atkCrit:R.crit,atkFumble:false,weaponName:"Чудо",dmgDice:"3d12",dmgType:"Д",dmgBonus:cbon,magic:true,zone:playerZone,status:"pending_dodge",ts:Date.now()});
+  } else {
+    sRollP({label:s.name+" 🔮 Чудо",d10:R.d,crit:R.crit,parts:[{label:"WILL",value:will},{label:"Miracle",value:msk}],total:hitC,subtext:"Каст удался — нет цели"});
+  }
 }
 
 return(<div style={{flex:1,display:"flex",flexDirection:"column"}}>
