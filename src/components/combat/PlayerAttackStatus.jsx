@@ -1,6 +1,6 @@
 import React from 'react';
 import { db, ref, remove } from '../../firebase';
-import { ZONES } from '../../data/combat';
+import { ZONES, zoneByName } from '../../data/combat';
 import { calcAE } from '../../utils/combat';
 import { r1, rN, sm } from '../../utils/dice';
 import PendingAttackPopup from './PendingAttackPopup';
@@ -64,7 +64,7 @@ function PlayerAttackStatus(pr){
                 var dice=rN(parseInt(m[1]),parseInt(m[2]));
                 var critM=atk.atkCrit?1.5:1;
                 var rawDmg=Math.floor((sm(dice)+(atk.dmgBonus||0))*critM);
-                var zoneD=r1(6);var zoneObj=ZONES[zoneD-1];
+                var aimed=!!atk.aimedZone;var zoneD=aimed?0:r1(6);var zoneObj=aimed?zoneByName(atk.aimedZone):ZONES[zoneD-1];var zoneRoll=aimed?"🎯прицел":"1d6="+zoneD;
                 var multiplied=Math.floor(rawDmg*zoneObj.mult);
                 var npcArmorType=zoneObj.slot==="head"?(npc.armorHead||"none"):(npc.armorBody||"none");
                 var npcArmorHp=zoneObj.slot==="head"?(npc.armorHeadHp||0):(npc.armorBodyHp||0);
@@ -75,7 +75,7 @@ function PlayerAttackStatus(pr){
                 if(ae.ad>0){if(zoneObj.slot==="head")updNpc.armorHeadHp=Math.max(0,(npc.armorHeadHp||0)-ae.ad);else updNpc.armorBodyHp=Math.max(0,(npc.armorBodyHp||0)-ae.ad);}
                 var spAll=Object.assign({},spawned);spAll[atk.npcId]=updNpc;
                 if(saveSpawned)saveSpawned(spAll);
-                if(addLog)addLog({who:atk.attackerName,type:"dmg",label:"💥 "+atk.weaponName+" → "+atk.npcName+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP",detail:"1d6="+zoneD+" "+zoneObj.name+" | "+ae.desc+" | ❤️ "+(npc.hp||0)+"→"+newNpcHp,total:ae.hd});
+                if(addLog)addLog({who:atk.attackerName,type:"dmg",label:"💥 "+atk.weaponName+" → "+atk.npcName+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP",detail:zoneRoll+" "+zoneObj.name+" | "+ae.desc+" | ❤️ "+(npc.hp||0)+"→"+newNpcHp,total:ae.hd});
                 if(pr.onRoll)pr.onRoll({label:atk.weaponName+" 💥 Урон",d10:null,parts:[{label:atk.dmgDice||"1d6",value:sm(dice)},{label:"Бнс",value:atk.dmgBonus||0}],total:rawDmg,subtext:"Тип: "+(atk.dmgType||"Р")+"\n"+zoneObj.e+" "+zoneObj.name+" ×"+zoneObj.mult+"\n→ "+atk.npcName+": "+(npc.hp||0)+"→"+newNpcHp+" HP"});
                 if(pr.saveNpcHit)pr.saveNpcHit({attackerName:atk.attackerName,srcLabel:atk.weaponName||"",npcName:atk.npcName,zone:zoneObj.name,zoneE:zoneObj.e,zoneMult:zoneObj.mult,dmgType:atk.dmgType||"Р",dmg:ae.hd,oldHp:(npc.hp||0),newHp:newNpcHp,desc:ae.desc,ts:Date.now()});
                 remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id));

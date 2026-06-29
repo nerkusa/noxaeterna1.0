@@ -1,6 +1,6 @@
 import React from 'react';
 import { db, ref, update, remove } from '../../firebase';
-import { ZONES } from '../../data/combat';
+import { ZONES, zoneByName } from '../../data/combat';
 import { calcAE } from '../../utils/combat';
 import { r1, rN, sm, rollHit } from '../../utils/dice';
 import DamagePopup from './DamagePopup';
@@ -23,7 +23,7 @@ function PlayerAttackNotif(pr){
     var dodgedNpc=(dmgAtk.dodgeRoll||0)>=(dmgAtk.hitRoll||0);
     function doNpcDmg(){
       if(!dmgNpc)return;
-      var zoneD=r1(6);var zoneObj=ZONES[zoneD-1];
+      var aimed=!!dmgAtk.aimedZone;var zoneD=aimed?0:r1(6);var zoneObj=aimed?zoneByName(dmgAtk.aimedZone):ZONES[zoneD-1];var zoneRoll=aimed?"🎯прицел":"1d6="+zoneD;
       var m=(dmgAtk.dmgDice||"1d6").match(/(\d+)d(\d+)/);if(!m)return;
       var dice=rN(parseInt(m[1]),parseInt(m[2]));
       var critM=dmgAtk.atkCrit?1.5:1;
@@ -37,7 +37,7 @@ function PlayerAttackNotif(pr){
       var updNpc=Object.assign({},dmgNpc,{hp:newNpcHp});
       if(ae.ad>0){if(zoneObj.slot==="head")updNpc.armorHeadHp=Math.max(0,(dmgNpc.armorHeadHp||0)-ae.ad);else updNpc.armorBodyHp=Math.max(0,(dmgNpc.armorBodyHp||0)-ae.ad);}
       var spAll=Object.assign({},spawned);spAll[dmgAtk.npcId]=updNpc;saveSpawned(spAll);
-      addLog({who:dmgAtk.attackerName,type:"dmg",label:"💥 "+dmgAtk.weaponName+" → "+dmgAtk.npcName+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP",detail:"1d6="+zoneD+" "+zoneObj.name+" | "+ae.desc+" | ❤️ "+(dmgNpc.hp||0)+"→"+newNpcHp,total:ae.hd});
+      addLog({who:dmgAtk.attackerName,type:"dmg",label:"💥 "+dmgAtk.weaponName+" → "+dmgAtk.npcName+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP",detail:zoneRoll+" "+zoneObj.name+" | "+ae.desc+" | ❤️ "+(dmgNpc.hp||0)+"→"+newNpcHp,total:ae.hd});
       onRoll&&onRoll({label:dmgAtk.attackerName+" 💥 Урон",d10:null,parts:[{label:dmgAtk.dmgDice||"1d6",value:sm(dice)},{label:"Бнс",value:dmgAtk.dmgBonus||0}],total:rawDmg,subtext:zoneObj.e+" "+zoneObj.name+" ×"+zoneObj.mult+(zoneObj.ignoreArmor?" 🔓":"")+"\n"+ae.desc+"\n→ "+dmgAtk.npcName+": "+(dmgNpc.hp||0)+"→"+newNpcHp+" HP"});
       remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+dmgId));
     }

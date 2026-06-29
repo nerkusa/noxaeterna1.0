@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { db, ref, set } from '../../firebase';
-import { ZONES } from '../../data/combat';
+import { ZONES, aimPen } from '../../data/combat';
 import { getProfs } from '../../utils/profStore';
 import { DT, WS, WT, wStat, wtLabel } from '../../data/stats';
 import { S } from '../../styles/ui';
@@ -34,6 +34,7 @@ function startEditW(w){sEditWId(w.id);sEditWn(w.name);sEditWdi(w.dmgDice||"1d6")
 function saveEditW(){if(!editWId)return;sv(Object.assign({},c,{weapons:(c.weapons||[]).map(function(w){return w.id===editWId?Object.assign({},w,{name:editWn,dmgDice:editWdi,dmgType:editWdt,type:editWt,bonus:editWb}):w})}));sEditWId(null);}
 var _tgt=useState(null);var tgtId=_tgt[0];var sTgt=_tgt[1];
 var _zone=useState("Торс");var selZone=_zone[0];var sZone=_zone[1];
+var _aim=useState(false);var aim=_aim[0];var sAim=_aim[1];
 var _mint=useState("");var mInt=_mint[0];var sMInt=_mint[1];
 var spawned=pr.spawned||{};var saveSpawned=pr.saveSpawned;
 var spawnedArr=Object.entries(spawned).filter(function(e){var hp=e[1].hp!==undefined?e[1].hp:e[1].maxHp;return hp>0});
@@ -74,10 +75,11 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 </button>})}
 </div>
 {tgtNpc&&<div style={{marginTop:5,paddingTop:5,borderTop:"1px solid #3a1c1c"}}>
-<label style={Object.assign({},S.lb,{color:"#ef4444",marginBottom:3})}>🎯 Зона удара → {tgtNpc.name}</label>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}><label style={Object.assign({},S.lb,{color:"#ef4444",marginBottom:0})}>🎯 Зона удара → {tgtNpc.name}</label><button onClick={function(){sAim(!aim)}} title="Прицельный удар: бьёшь по выбранной зоне со штрафом к попаданию" style={{padding:"2px 7px",borderRadius:5,border:"2px solid "+(aim?"#f59e0b":"#322d24"),background:aim?"#231b08":"#1d1a14",fontSize:8,fontWeight:700,color:aim?"#f0b352":"#a89a82",cursor:"pointer"}}>{aim?("🎯 Прицельно (−"+aimPen(selZone)+")"):"🎯 Прицельно: выкл"}</button></div>
 <div style={{display:"flex",flexWrap:"wrap",gap:2}}>
-{ZONES.map(function(z){var isSel=selZone===z.name;return <button key={z.name} onClick={function(){sZone(z.name)}} style={{padding:"2px 6px",borderRadius:5,border:"2px solid "+(isSel?"#f59e0b":"#322d24"),background:isSel?"#231b08":"#1d1a14",fontSize:8,fontWeight:isSel?700:400,cursor:"pointer"}}>{z.e+" "+z.name+(z.ignoreArmor?" 🔓":"")+" ×"+z.mult}</button>})}
+{ZONES.map(function(z){var isSel=selZone===z.name;return <button key={z.name} onClick={function(){sZone(z.name)}} style={{padding:"2px 6px",borderRadius:5,border:"2px solid "+(isSel?"#f59e0b":"#322d24"),background:isSel?"#231b08":"#1d1a14",fontSize:8,fontWeight:isSel?700:400,cursor:"pointer",opacity:aim&&!isSel?0.5:1}}>{z.e+" "+z.name+(z.ignoreArmor?" 🔓":"")+" ×"+z.mult+(aim?" −"+aimPen(z.name):"")}</button>})}
 </div>
+{aim&&<div style={{fontSize:8,color:"#f0b352",marginTop:3,fontStyle:"italic"}}>Прицельно в «{selZone}»: −{aimPen(selZone)} к попаданию, урон точно по этой зоне.</div>}
 </div>}
 </div>}
 
@@ -213,9 +215,9 @@ return(<div key={(w.id!=null?w.id:"w")+"_"+wIdx} style={{background:isEq?"#0e201
 <button onClick={function(){var upd={weaponMode:"2h"};if(c.equippedShield)upd.equippedShield=null;sv(Object.assign({},c,upd));}} style={{flex:1,padding:"2px 0",borderRadius:4,border:curMode==="2h"?"2px solid #3b82f6":"1px solid #322d24",background:curMode==="2h"?"#0e1a2b":"#1d1a14",fontSize:8,fontWeight:curMode==="2h"?700:400,cursor:"pointer",color:curMode==="2h"?"#60a5fa":"#b3a890"}}>2 руки · {w.dmgDice2h||w.dmgDice}{w.bonus2h!==undefined?" +"+w.bonus2h:""}</button>
 </div>}
 <div style={{display:"flex",gap:3}}>
-<button onClick={function(){var R=rollHit();var d=R.d;var rv=fs[statKey]||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&(pf.id==="warrior"||pf.abilityType==="bonus_attack"))?5:0;if(warBon)sv(Object.assign({},c,{warriorBonus:false}));var t=d+rv+sv2+(w.bonus||0)+warBon;pr.addLog({who:c.name||"???",type:"hit",label:"🎯 "+w.name+(tgtNpc?" → "+tgtNpc.name:"")+(warBon?" ⚔️+5":"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + "+statKey+"("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+") = "+t,total:t});
-if(tgtNpc&&tgtId&&pr.savePendingAttack){pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:t,atkD:d,atkREF:rv,atkStatName:statKey,atkSkill:sv2,atkSkillName:sk,atkBonus:w.bonus||0,atkCrit:R.crit,atkFumble:R.fumble,weaponName:w.name,dmgDice:activeDice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:activeBon,zone:selZone,status:"pending_dodge",ts:Date.now()});}
-else{oR({label:w.name+" Попад.",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:statKey,value:rv},{label:sk,value:sv2},{label:"Бнс",value:w.bonus||0}],total:t});}}}
+<button onClick={function(){var R=rollHit();var d=R.d;var rv=fs[statKey]||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&(pf.id==="warrior"||pf.abilityType==="bonus_attack"))?5:0;if(warBon)sv(Object.assign({},c,{warriorBonus:false}));var aimP=(aim&&tgtNpc)?aimPen(selZone):0;var t=d+rv+sv2+(w.bonus||0)+warBon-aimP;pr.addLog({who:c.name||"???",type:"hit",label:"🎯 "+w.name+(tgtNpc?" → "+tgtNpc.name:"")+(aimP?" 🎯"+selZone+"(−"+aimP+")":"")+(warBon?" ⚔️+5":"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + "+statKey+"("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+")"+(aimP?" − прицел("+aimP+")":"")+" = "+t,total:t});
+if(tgtNpc&&tgtId&&pr.savePendingAttack){pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:t,atkD:d,atkREF:rv,atkStatName:statKey,atkSkill:sv2,atkSkillName:sk,atkBonus:w.bonus||0,atkCrit:R.crit,atkFumble:R.fumble,weaponName:w.name,dmgDice:activeDice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:activeBon,zone:selZone,aimedZone:aimP?selZone:null,status:"pending_dodge",ts:Date.now()});}
+else{oR({label:w.name+" Попад."+(aimP?" 🎯"+selZone:""),d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:statKey,value:rv},{label:sk,value:sv2},{label:"Бнс",value:w.bonus||0}].concat(aimP?[{label:"Прицел",value:-aimP}]:[]),total:t});}}}
  style={{flex:1,padding:4,borderRadius:5,border:"1px solid #3b82f620",background:"#0e1a2b",cursor:"pointer",fontWeight:700,fontSize:9,color:"#60a5fa",textAlign:"center"}}>{"🎯"+(tgtNpc?" →"+tgtNpc.name.slice(0,8):"")}</button>
 <button onClick={function(){
   var m=activeDice.match(/(\d+)d(\d+)/);if(!m)return;
