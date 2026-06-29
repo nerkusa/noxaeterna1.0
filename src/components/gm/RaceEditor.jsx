@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RACES } from '../../data/races';
+import { RACES, RACE_DESC } from '../../data/races';
 import { SD, SKD } from '../../data/stats';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #322d24', background: '#1d1a14', color: '#ece5d8', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
@@ -12,7 +12,8 @@ function normalize(races) {
   const base = (Array.isArray(races) && races.length) ? races.slice() : RACES.slice();
   // guarantee the "— Нет —" entry stays first
   if (!base.find(r => r.id === 'none')) base.unshift(RACES[0]);
-  return base;
+  // pre-fill built-in descriptions so the GM can see and edit them
+  return base.map(r => (r.desc === undefined && RACE_DESC[r.id]) ? Object.assign({}, r, { desc: RACE_DESC[r.id] }) : r);
 }
 
 export default function RaceEditor(pr) {
