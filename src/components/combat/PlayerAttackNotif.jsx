@@ -26,7 +26,8 @@ function PlayerAttackNotif(pr){
       var zoneD=r1(6);var zoneObj=ZONES[zoneD-1];
       var m=(dmgAtk.dmgDice||"1d6").match(/(\d+)d(\d+)/);if(!m)return;
       var dice=rN(parseInt(m[1]),parseInt(m[2]));
-      var rawDmg=sm(dice)+(dmgAtk.dmgBonus||0);
+      var critM=dmgAtk.atkCrit?1.5:1;
+      var rawDmg=Math.floor((sm(dice)+(dmgAtk.dmgBonus||0))*critM);
       var multiplied=Math.floor(rawDmg*zoneObj.mult);
       var npcArmorType=zoneObj.slot==="head"?(dmgNpc.armorHead||"none"):(dmgNpc.armorBody||"none");
       var npcArmorHp=zoneObj.slot==="head"?(dmgNpc.armorHeadHp||0):(dmgNpc.armorBodyHp||0);
@@ -103,6 +104,7 @@ function PlayerAttackNotif(pr){
           {atkBonus2!==0&&<span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#a89a82",fontSize:7,display:"block"}}>Бнс</span><span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkBonus2}</span></span>}
         </div>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:"#60a5fa"}}>{"= "+atk.hitRoll}</div>
+        {atk.atkCrit&&<div style={{fontSize:11,color:"#d97706",fontWeight:700}}>🌟 КРИТ ×1.5</div>}{atk.atkFumble&&<div style={{fontSize:11,color:"#dc2626",fontWeight:700}}>💀 ПРОВАЛ</div>}
         <div style={{fontSize:9,color:"#a89a82",marginTop:2}}>{(atk.weaponName||"")+(atk.dmgType?" · "+atk.dmgType:"")}</div>
       </div>
       {/* Защита NPC */}
