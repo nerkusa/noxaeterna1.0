@@ -1,6 +1,6 @@
 import React from 'react';
 import { db, ref, set, update, remove } from '../../firebase';
-import { ZONES } from '../../data/combat';
+import { ZONES, zoneByName } from '../../data/combat';
 import { cF, mHP } from '../../utils/character';
 import { calcAE } from '../../utils/combat';
 import { r1, rN, sm } from '../../utils/dice';
@@ -28,7 +28,7 @@ function GMAttackPanel(pr){
 
   function doRollDmg(){
     if(!tgtChar)return;
-    var zoneD=r1(6);var zoneObj=ZONES[zoneD-1];
+    var aimed=!!atk.aimedZone;var zoneD=aimed?0:r1(6);var zoneObj=aimed?zoneByName(atk.aimedZone):ZONES[zoneD-1];var zoneRoll=aimed?"🎯прицел":"1d6="+zoneD;
     var m=(atk.dmgDice||"1d6").match(/(\d+)d(\d+)/);if(!m)return;
     var dice=rN(parseInt(m[1]),parseInt(m[2]));
     var critM=atk.atkCrit?1.5:1;
@@ -56,7 +56,7 @@ function GMAttackPanel(pr){
     if(pArmorObj&&ae.ad>0){patch.armors=(tgtChar.armors||[]).map(function(a){return a.id===pArmorId?Object.assign({},a,{hp:Math.max(0,a.hp-ae.ad)}):a;});}
     update(ref(db,"rooms/"+pr.room+"/characters/"+tgtChar._fbId),patch);
     if(ae.hd>0){set(ref(db,"rooms/"+pr.room+"/dmgEvents/"+tgtChar._fbId),{attackerName:atk.attackerName,dmg:ae.hd,oldHp:pCur,newHp:newHp,maxHp:pMx,ts:Date.now()});}
-    addLog({who:atk.attackerName,type:"dmg_npc",label:"💥 "+atk.weaponName+" → "+atk.targetName+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP"+shieldDesc,detail:"1d6="+zoneD+" "+zoneObj.name+" | "+ae.desc+" | ❤️ "+pCur+"→"+newHp,total:ae.hd});
+    addLog({who:atk.attackerName,type:"dmg_npc",label:"💥 "+atk.weaponName+" → "+atk.targetName+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP"+shieldDesc,detail:zoneRoll+" "+zoneObj.name+" | "+ae.desc+" | ❤️ "+pCur+"→"+newHp,total:ae.hd});
     onRoll({label:atk.attackerName+" 💥 Урон",d10:null,parts:[{label:atk.dmgDice||"1d6",value:sm(dice)},{label:"Бнс",value:atk.dmgBonus||0}],total:rawDmg,subtext:zoneObj.e+" "+zoneObj.name+" ×"+zoneObj.mult+(zoneObj.ignoreArmor?" 🔓":"")+"\n"+ae.desc+shieldDesc+"\n→ "+atk.targetName+": "+pCur+"→"+newHp+" HP"});
     remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id));
   }

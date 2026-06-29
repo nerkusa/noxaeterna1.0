@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { db, ref, set } from '../../firebase';
-import { ARMOR_T, ZONES } from '../../data/combat';
+import { ARMOR_T, ZONES, aimPen } from '../../data/combat';
 import { DT, SD, WT } from '../../data/stats';
 import { S } from '../../styles/ui';
 import { cF, mHP } from '../../utils/character';
@@ -20,6 +20,7 @@ var _rp=useState(null);var rollP=_rp[0];var sRollP=_rp[1];
 /* target selection for NPC attacks */
 var _ptgt=useState(null);var playerTgtId=_ptgt[0];var sPlayerTgt=_ptgt[1];
 var _pzone=useState("Торс");var playerZone=_pzone[0];var sPlayerZone=_pzone[1];
+var _naim=useState(false);var npcAim=_naim[0];var sNpcAim=_naim[1];
 /* NPC form state */
 var _nn=useState("");var nn=_nn[0];var sNN=_nn[1];var _nl=useState(1);var nl=_nl[0];var sNL=_nl[1];var _nhp=useState(20);var nhp=_nhp[0];var sNHP=_nhp[1];
 var _nstats=useState({INT:3,REF:3,DEX:3,BODY:3,EMP:1,CRA:1,WILL:3});var nstats=_nstats[0];var sNStats=_nstats[1];
@@ -85,17 +86,17 @@ function npcAttack(s,w){
   var rv,skVal,skNm,atName;
   if(w.magic){rv=st.WILL||0;skVal=sk.spellcast||0;skNm="Spellcast";atName="WILL";}
   else{var skMap={Battle:"battleWeapon",Simple:"simpleWeapon",Guns:"guns",Archery:"archery"};skVal=sk[skMap[w.type]]||0;rv=st.REF||0;skNm=w.type;atName="REF";}
-  var R=rollHit();var d=R.d;var t=d+rv+skVal+(w.bonus||0);
+  var R=rollHit();var d=R.d;var aimP=(npcAim&&playerTgtId)?aimPen(playerZone):0;var t=d+rv+skVal+(w.bonus||0)-aimP;
   var tgtChar=playerTgtId?playerChars.find(function(x){return x._fbId===playerTgtId}):null;
   var tgtName=tgtChar?tgtChar.name:"";
-  pr.addLog({who:s.name,type:"hit",label:(w.magic?"🔮 ":"🎯 ")+w.name+(tgtName?" → "+tgtName:"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + "+atName+"("+rv+") + "+skNm+"("+skVal+") + бонус("+(w.bonus||0)+") = "+t,total:t});
+  pr.addLog({who:s.name,type:"hit",label:(w.magic?"🔮 ":"🎯 ")+w.name+(tgtName?" → "+tgtName:"")+(aimP?" 🎯"+playerZone+"(−"+aimP+")":"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + "+atName+"("+rv+") + "+skNm+"("+skVal+") + бонус("+(w.bonus||0)+")"+(aimP?" − прицел("+aimP+")":"")+" = "+t,total:t});
   /* RollPopup не показываем — результат отображается в GMAttackPanel */
   if(!playerTgtId){sRollP({label:s.name+" — "+w.name+" Попад.",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:atName,value:rv},{label:skNm,value:skVal},{label:"Бнс",value:w.bonus||0}],total:t,subtext:"(нет цели)"});}
   if(playerTgtId&&pr.savePendingAttack){
     pr.savePendingAttack({id:"atk_"+Date.now(),attackerName:s.name,targetId:playerTgtId,targetName:tgtName,
       hitRoll:t,atkD:d,atkREF:rv,atkSkill:skVal,atkSkillName:skNm,atkBonus:w.bonus||0,atkCrit:R.crit,atkFumble:R.fumble,
       weaponName:w.name,dmgDice:w.dice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:w.bonus||0,magic:!!w.magic,
-      zone:playerZone,status:"pending_dodge",ts:Date.now()});
+      zone:playerZone,aimedZone:aimP?playerZone:null,status:"pending_dodge",ts:Date.now()});
   }
 }
 
@@ -177,9 +178,9 @@ return <button key={pc._fbId} onClick={function(){sPlayerTgt(isSel?null:pc._fbId
 </button>})}
 </div>
 {playerTgtId&&<div style={{marginTop:4}}>
-<label style={Object.assign({},S.lb,{marginTop:3})}>Зона удара по игроку</label>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><label style={Object.assign({},S.lb,{marginTop:3})}>Зона удара по игроку</label><button onClick={function(){sNpcAim(!npcAim)}} title="Прицельный удар: NPC бьёт по выбранной зоне со штрафом" style={{padding:"2px 7px",borderRadius:5,border:"2px solid "+(npcAim?"#f59e0b":"#322d24"),background:npcAim?"#231b08":"#1d1a14",fontSize:8,fontWeight:700,color:npcAim?"#f0b352":"#a89a82",cursor:"pointer"}}>{npcAim?("🎯 Прицельно (−"+aimPen(playerZone)+")"):"🎯 Прицельно: выкл"}</button></div>
 <div style={{display:"flex",flexWrap:"wrap",gap:2,marginTop:2}}>
-{ZONES.map(function(z){return <button key={z.name} onClick={function(){sPlayerZone(z.name)}} style={{padding:"2px 5px",borderRadius:5,border:"2px solid "+(playerZone===z.name?"#f59e0b":"#322d24"),background:playerZone===z.name?"#231b08":"#1d1a14",fontSize:8,fontWeight:playerZone===z.name?700:400,cursor:"pointer"}}>{z.e+" "+z.name+(z.ignoreArmor?" 🔓":"")+" ×"+z.mult}</button>})}
+{ZONES.map(function(z){return <button key={z.name} onClick={function(){sPlayerZone(z.name)}} style={{padding:"2px 5px",borderRadius:5,border:"2px solid "+(playerZone===z.name?"#f59e0b":"#322d24"),background:playerZone===z.name?"#231b08":"#1d1a14",fontSize:8,fontWeight:playerZone===z.name?700:400,cursor:"pointer",opacity:npcAim&&playerZone!==z.name?0.5:1}}>{z.e+" "+z.name+(z.ignoreArmor?" 🔓":"")+" ×"+z.mult+(npcAim?" −"+aimPen(z.name):"")}</button>})}
 </div>
 </div>}
 </div>}
