@@ -145,9 +145,33 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
     sv(Object.assign({},c,{curWill:curW-1}));
     var R=rollHit();var dd=R.d;var wv=fs.WILL||0;var msk=es.Spellcasting||0;var hitC=dd+wv+msk;
     var cbon=r1(6)+(c.sensitiveBonus?r1(6):0);
-    pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,magic:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:hitC,atkD:dd,atkREF:wv,atkSkill:msk,atkSkillName:"Miracle",atkBonus:0,weaponName:mInt||"Чудо",dmgDice:"3d12",dmgType:"Д",dmgBonus:cbon,zone:selZone,castIntent:mInt||"",status:"pending_dodge",ts:Date.now()});
-    pr.addLog({who:c.name||"???",type:"magic",label:"✨ "+(mInt||"Чудо")+" → "+tgtNpc.name+" (бросок чуда)"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+dd+" + WILL("+wv+") + Miracle("+msk+") = "+hitC,total:hitC});
-    oR({label:mInt||"✨ Чудо",d10:dd,crit:R.crit,fumble:R.fumble,parts:[{label:"WILL",value:wv},{label:"Miracle",value:msk}],total:hitC,subtext:(mInt?"«"+mInt+"»\n":"")+"−1 WILL\n→ "+tgtNpc.name+" сопротивляется Miracle Resist…"});
+    if(R.fumble){
+      /* 💀 ПРОВАЛ каста — хаос магии: чудо срывается на себя или союзника */
+      var ftF=sm(rN(3,12))+cbon;
+      if(r1(2)===1){
+        sv(Object.assign({},c,{curHp:Math.max(0,curHp-ftF),curWill:Math.max(0,curW-1),sensitiveBonus:false}));
+        pr.addLog({who:c.name||"???",type:"magic_fail",label:"💀💥 "+(mInt||"Чудо")+" — провал каста! Удар по СЕБЕ: "+ftF,detail:"🎲"+dd+" 💀",total:ftF});
+        oR({label:mInt||"🔮 Чудо",d10:dd,fumble:true,parts:[],total:ftF,subtext:"💀 ПРОВАЛ КАСТА!\n💥 "+ftF+" урона СЕБЕ\n−1 WILL"});
+      } else {
+        var actAllies=(pr.characters||[]).filter(function(x){return x._fbId!==c._fbId&&x.active});
+        if(!actAllies.length)actAllies=(pr.characters||[]).filter(function(x){return x._fbId!==c._fbId});
+        var ally=actAllies.length>0?pk(actAllies):null;
+        if(ally&&pr.room){
+          var aInf=cF(ally);var aMx=ally.hpOv||mHP(aInf.fs);var aCur=ally.curHp!==null&&ally.curHp!==undefined?ally.curHp:aMx;var aNewHp=Math.max(0,aCur-ftF);
+          var aUpd=Object.assign({},ally,{curHp:aNewHp});delete aUpd._fbId;
+          set(ref(db,"rooms/"+pr.room+"/characters/"+ally._fbId),aUpd);
+          set(ref(db,"rooms/"+pr.room+"/dmgEvents/"+ally._fbId),{attackerName:(c.name||"???")+" (хаос магии)",dmg:ftF,oldHp:aCur,newHp:aNewHp,maxHp:aMx,ts:Date.now()});
+        }
+        sv(Object.assign({},c,{curWill:Math.max(0,curW-1),sensitiveBonus:false}));
+        pr.addLog({who:c.name||"???",type:"magic_fail",label:"💀🔥 "+(mInt||"Чудо")+" — провал каста! Дружественный огонь"+(ally?" → "+ally.name:""),detail:"Урон: "+ftF,total:ftF});
+        oR({label:mInt||"🔮 Чудо",d10:dd,fumble:true,parts:[],total:ftF,subtext:"💀 ПРОВАЛ КАСТА!\n🔥 "+ftF+(ally?" → "+ally.name:"")+"\n−1 WILL"});
+      }
+      sMInt("");
+      return;
+    }
+    pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,magic:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:hitC,atkD:dd,atkREF:wv,atkStatName:"WILL",atkSkill:msk,atkSkillName:"Miracle",atkBonus:0,atkCrit:R.crit,atkFumble:false,weaponName:mInt||"Чудо",dmgDice:"3d12",dmgType:"Д",dmgBonus:cbon,zone:selZone,castIntent:mInt||"",status:"pending_dodge",ts:Date.now()});
+    pr.addLog({who:c.name||"???",type:"magic",label:"✨ "+(mInt||"Чудо")+" → "+tgtNpc.name+" (бросок чуда)"+(R.crit?" 🌟КРИТ":""),detail:"🎲"+dd+" + WILL("+wv+") + Miracle("+msk+") = "+hitC,total:hitC});
+    oR({label:mInt||"✨ Чудо",d10:dd,crit:R.crit,parts:[{label:"WILL",value:wv},{label:"Miracle",value:msk}],total:hitC,subtext:(mInt?"«"+mInt+"»\n":"")+"−1 WILL\n→ "+tgtNpc.name+" сопротивляется Miracle Resist…"});
     sMInt("");
     return;
   }
@@ -224,7 +248,7 @@ return(<div key={(w.id!=null?w.id:"w")+"_"+wIdx} style={{background:isEq?"#0e201
 </div>}
 <div style={{display:"flex",gap:3}}>
 <button onClick={function(){var R=rollHit();var d=R.d;var rv=fs[statKey]||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&(pf.id==="warrior"||pf.abilityType==="bonus_attack"))?5:0;if(warBon)sv(Object.assign({},c,{warriorBonus:false}));var t=d+rv+sv2+(w.bonus||0)+warBon;pr.addLog({who:c.name||"???",type:"hit",label:"🎯 "+w.name+(tgtNpc?" → "+tgtNpc.name:"")+(warBon?" ⚔️+5":"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + "+statKey+"("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+") = "+t,total:t});
-if(tgtNpc&&tgtId&&pr.savePendingAttack){pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:t,atkD:d,atkREF:rv,atkStatName:statKey,atkSkill:sv2,atkSkillName:sk,atkBonus:w.bonus||0,weaponName:w.name,dmgDice:activeDice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:activeBon,zone:selZone,status:"pending_dodge",ts:Date.now()});}
+if(tgtNpc&&tgtId&&pr.savePendingAttack){pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:t,atkD:d,atkREF:rv,atkStatName:statKey,atkSkill:sv2,atkSkillName:sk,atkBonus:w.bonus||0,atkCrit:R.crit,atkFumble:R.fumble,weaponName:w.name,dmgDice:activeDice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:activeBon,zone:selZone,status:"pending_dodge",ts:Date.now()});}
 else{oR({label:w.name+" Попад.",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:statKey,value:rv},{label:sk,value:sv2},{label:"Бнс",value:w.bonus||0}],total:t});}}}
  style={{flex:1,padding:4,borderRadius:5,border:"1px solid #3b82f620",background:"#0e1a2b",cursor:"pointer",fontWeight:700,fontSize:9,color:"#60a5fa",textAlign:"center"}}>{"🎯"+(tgtNpc?" →"+tgtNpc.name.slice(0,8):"")}</button>
 <button onClick={function(){

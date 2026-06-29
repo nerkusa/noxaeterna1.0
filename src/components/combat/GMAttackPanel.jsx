@@ -31,7 +31,8 @@ function GMAttackPanel(pr){
     var zoneD=r1(6);var zoneObj=ZONES[zoneD-1];
     var m=(atk.dmgDice||"1d6").match(/(\d+)d(\d+)/);if(!m)return;
     var dice=rN(parseInt(m[1]),parseInt(m[2]));
-    var rawDmg=sm(dice)+(atk.dmgBonus||0);
+    var critM=atk.atkCrit?1.5:1;
+    var rawDmg=Math.floor((sm(dice)+(atk.dmgBonus||0))*critM);
     var multiplied=Math.floor(rawDmg*zoneObj.mult);
     var pArmorId=zoneObj.slot==="head"?tgtChar.equippedHead:tgtChar.equippedBody;
     var pArmorObj=(tgtChar.armors||[]).find(function(a){return a.id===pArmorId;});
@@ -90,6 +91,7 @@ function GMAttackPanel(pr){
           </span>}
         </div>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:"#dc2626"}}>{"= "+atk.hitRoll}</div>
+        {atk.atkCrit&&<div style={{fontSize:11,color:"#d97706",fontWeight:700}}>🌟 КРИТ ×1.5</div>}{atk.atkFumble&&<div style={{fontSize:11,color:"#dc2626",fontWeight:700}}>💀 ПРОВАЛ</div>}
         <div style={{fontSize:9,color:"#a89a82",marginTop:2}}>{atk.weaponName+" · "+atk.dmgDice+" · "+atk.dmgType}</div>
       </div>
 
