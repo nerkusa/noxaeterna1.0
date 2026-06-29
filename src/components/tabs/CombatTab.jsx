@@ -140,77 +140,43 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 <input value={mInt} onChange={function(e){sMInt(e.target.value)}} placeholder="Опиши чудо: «Создал фаербол и метнул…»" style={Object.assign({},S.inp,{fontSize:9,padding:5,border:"2px solid #7c3aed28"})}/>
 <button onClick={function(){
   if(curW<=0){alert("Нет WILL!");return}
-  if(tgtNpc&&tgtId&&pr.savePendingAttack){
-    /* Контест против NPC: чудо vs Miracle Resist (как атака) */
-    sv(Object.assign({},c,{curWill:curW-1}));
-    var R=rollHit();var dd=R.d;var wv=fs.WILL||0;var msk=es.Spellcasting||0;var hitC=dd+wv+msk;
-    var cbon=r1(6)+(c.sensitiveBonus?r1(6):0);
-    if(R.fumble){
-      /* 💀 ПРОВАЛ каста — хаос магии: чудо срывается на себя или союзника */
-      var ftF=sm(rN(3,12))+cbon;
-      if(r1(2)===1){
-        sv(Object.assign({},c,{curHp:Math.max(0,curHp-ftF),curWill:Math.max(0,curW-1),sensitiveBonus:false}));
-        pr.addLog({who:c.name||"???",type:"magic_fail",label:"💀💥 "+(mInt||"Чудо")+" — провал каста! Удар по СЕБЕ: "+ftF,detail:"🎲"+dd+" 💀",total:ftF});
-        oR({label:mInt||"🔮 Чудо",d10:dd,fumble:true,parts:[],total:ftF,subtext:"💀 ПРОВАЛ КАСТА!\n💥 "+ftF+" урона СЕБЕ\n−1 WILL"});
-      } else {
-        var actAllies=(pr.characters||[]).filter(function(x){return x._fbId!==c._fbId&&x.active});
-        if(!actAllies.length)actAllies=(pr.characters||[]).filter(function(x){return x._fbId!==c._fbId});
-        var ally=actAllies.length>0?pk(actAllies):null;
-        if(ally&&pr.room){
-          var aInf=cF(ally);var aMx=ally.hpOv||mHP(aInf.fs);var aCur=ally.curHp!==null&&ally.curHp!==undefined?ally.curHp:aMx;var aNewHp=Math.max(0,aCur-ftF);
-          var aUpd=Object.assign({},ally,{curHp:aNewHp});delete aUpd._fbId;
-          set(ref(db,"rooms/"+pr.room+"/characters/"+ally._fbId),aUpd);
-          set(ref(db,"rooms/"+pr.room+"/dmgEvents/"+ally._fbId),{attackerName:(c.name||"???")+" (хаос магии)",dmg:ftF,oldHp:aCur,newHp:aNewHp,maxHp:aMx,ts:Date.now()});
-        }
-        sv(Object.assign({},c,{curWill:Math.max(0,curW-1),sensitiveBonus:false}));
-        pr.addLog({who:c.name||"???",type:"magic_fail",label:"💀🔥 "+(mInt||"Чудо")+" — провал каста! Дружественный огонь"+(ally?" → "+ally.name:""),detail:"Урон: "+ftF,total:ftF});
-        oR({label:mInt||"🔮 Чудо",d10:dd,fumble:true,parts:[],total:ftF,subtext:"💀 ПРОВАЛ КАСТА!\n🔥 "+ftF+(ally?" → "+ally.name:"")+"\n−1 WILL"});
-      }
-      sMInt("");
-      return;
-    }
-    pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,magic:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:hitC,atkD:dd,atkREF:wv,atkStatName:"WILL",atkSkill:msk,atkSkillName:"Miracle",atkBonus:0,atkCrit:R.crit,atkFumble:false,weaponName:mInt||"Чудо",dmgDice:"3d12",dmgType:"Д",dmgBonus:cbon,zone:selZone,castIntent:mInt||"",status:"pending_dodge",ts:Date.now()});
-    pr.addLog({who:c.name||"???",type:"magic",label:"✨ "+(mInt||"Чудо")+" → "+tgtNpc.name+" (бросок чуда)"+(R.crit?" 🌟КРИТ":""),detail:"🎲"+dd+" + WILL("+wv+") + Miracle("+msk+") = "+hitC,total:hitC});
-    oR({label:mInt||"✨ Чудо",d10:dd,crit:R.crit,parts:[{label:"WILL",value:wv},{label:"Miracle",value:msk}],total:hitC,subtext:(mInt?"«"+mInt+"»\n":"")+"−1 WILL\n→ "+tgtNpc.name+" сопротивляется Miracle Resist…"});
-    sMInt("");
-    return;
-  }
   sv(Object.assign({},c,{curWill:curW-1}));
-  var dmg=rN(3,12);var dT=sm(dmg);var bon=rN(1,6);var bT=sm(bon);var extraD6=c.sensitiveBonus?r1(6):0;var ft=dT+bT+extraD6;
-  var hit=r1(6);var ok=hit<=3;var sub="";
-  if(ok){
-    /* Попадание — урон по выбранному NPC */
-    if(tgtNpc&&tgtId&&saveSpawned){
-      applyDmgToNpc(tgtNpc,ft,"Д",selZone,saveSpawned,spawned,tgtId,pr.addLog,c.name||"???",pr.onNpcDeath,"🔮 Заклинание",pr.saveNpcHit);
-    }
-    sub=(mInt?"«"+mInt+"»\n":"")+"✨ ПОПАД! "+ft+"\n−1 WILL"+(tgtNpc?" → "+tgtNpc.name:" (нет цели)");
-    pr.addLog({who:c.name||"???",type:"magic",label:"✨ "+(mInt||"Чудо")+" — ПОПАД!"+(tgtNpc?" → "+tgtNpc.name:""),detail:"3d12+1d6="+ft,total:ft});
-  } else {
-    var cat2=r1(2);
-    if(cat2===1){
-      /* Обратный — урон себе, сбросить бонус */
+  var cbon=r1(6)+(c.sensitiveBonus?r1(6):0);
+  var ft=sm(rN(3,12))+cbon;
+  var cc=r1(6);
+  if(cc<=3){
+    /* Срыв каста (d6 1-3): 1-2 по себе, 3 по союзнику */
+    if(cc<=2){
       sv(Object.assign({},c,{curHp:Math.max(0,curHp-ft),curWill:Math.max(0,curW-1),sensitiveBonus:false}));
-      sub="💥 ОБРАТНЫЙ! "+ft+" урона СЕБЕ\n−1 WILL";
-      pr.addLog({who:c.name||"???",type:"magic_fail",label:"💥 "+(mInt||"Чудо")+" — Обратный! Урон себе: "+ft,detail:"",total:ft});
+      pr.addLog({who:c.name||"???",type:"magic_fail",label:"💥 "+(mInt||"Чудо")+" — срыв (d6="+cc+")! Удар по СЕБЕ: "+ft,detail:"",total:ft});
+      oR({label:mInt||"🔮 Чудо",d10:null,parts:[{label:"d6",value:cc}],total:ft,subtext:"💥 СРЫВ КАСТА!\n"+ft+" урона СЕБЕ\n−1 WILL"});
     } else {
-      /* Дружественный — урон случайному активному союзнику */
       var actAllies=(pr.characters||[]).filter(function(x){return x._fbId!==c._fbId&&x.active});
       if(!actAllies.length)actAllies=(pr.characters||[]).filter(function(x){return x._fbId!==c._fbId});
       var ally=actAllies.length>0?pk(actAllies):null;
       if(ally&&pr.room){
-        var aInf=cF(ally);var aFs=aInf.fs;
-        var aMx=ally.hpOv||mHP(aFs);
-        var aCur=ally.curHp!==null&&ally.curHp!==undefined?ally.curHp:aMx;
-        var aNewHp=Math.max(0,aCur-ft);
+        var aInf=cF(ally);var aMx=ally.hpOv||mHP(aInf.fs);var aCur=ally.curHp!==null&&ally.curHp!==undefined?ally.curHp:aMx;var aNewHp=Math.max(0,aCur-ft);
         var aUpd=Object.assign({},ally,{curHp:aNewHp});delete aUpd._fbId;
         set(ref(db,"rooms/"+pr.room+"/characters/"+ally._fbId),aUpd);
-        set(ref(db,"rooms/"+pr.room+"/dmgEvents/"+ally._fbId),{attackerName:(c.name||"???")+' (магия)',dmg:ft,oldHp:aCur,newHp:aNewHp,maxHp:aMx,ts:Date.now()});
+        set(ref(db,"rooms/"+pr.room+"/dmgEvents/"+ally._fbId),{attackerName:(c.name||"???")+" (срыв магии)",dmg:ft,oldHp:aCur,newHp:aNewHp,maxHp:aMx,ts:Date.now()});
       }
-      sub="🔥 ДРУЖЕСТВ! "+ft+(ally?" → "+ally.name:"")+"\n−1 WILL";
-      pr.addLog({who:c.name||"???",type:"magic_fail",label:"🔥 Дружественный огонь!"+(ally?" → "+ally.name:""),detail:"Урон: "+ft,total:ft});
+      sv(Object.assign({},c,{curWill:Math.max(0,curW-1),sensitiveBonus:false}));
+      pr.addLog({who:c.name||"???",type:"magic_fail",label:"🔥 "+(mInt||"Чудо")+" — срыв (d6=3)! Дружественный огонь"+(ally?" → "+ally.name:""),detail:"Урон: "+ft,total:ft});
+      oR({label:mInt||"🔮 Чудо",d10:null,parts:[{label:"d6",value:cc}],total:ft,subtext:"🔥 СРЫВ КАСТА!\n"+ft+(ally?" → "+ally.name:"")+"\n−1 WILL"});
     }
+    sMInt("");
+    return;
   }
-  oR({label:mInt||"🔮 Чудо",d10:hit,parts:[{label:"3d12",value:dT},{label:"1d6",value:bT}],total:ft,subtext:sub});
+  /* Каст удался (d6 4-6) — теперь враг кидает защиту (Miracle Resist) */
+  if(tgtNpc&&tgtId&&pr.savePendingAttack){
+    var R=rollHit();var dd=R.d;var wv=fs.WILL||0;var msk=es.Spellcasting||0;var hitC=dd+wv+msk;
+    pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,magic:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:hitC,atkD:dd,atkREF:wv,atkStatName:"WILL",atkSkill:msk,atkSkillName:"Miracle",atkBonus:0,atkCrit:R.crit,atkFumble:false,weaponName:mInt||"Чудо",dmgDice:"3d12",dmgType:"Д",dmgBonus:cbon,zone:selZone,castIntent:mInt||"",status:"pending_dodge",ts:Date.now()});
+    pr.addLog({who:c.name||"???",type:"magic",label:"✨ "+(mInt||"Чудо")+" → "+tgtNpc.name+" (каст удался d6="+cc+")"+(R.crit?" 🌟КРИТ":""),detail:"🎲"+dd+" + WILL("+wv+") + Miracle("+msk+") = "+hitC,total:hitC});
+    oR({label:mInt||"✨ Чудо",d10:dd,crit:R.crit,parts:[{label:"WILL",value:wv},{label:"Miracle",value:msk}],total:hitC,subtext:(mInt?"«"+mInt+"»\n":"")+"✅ Каст удался (d6="+cc+")\n−1 WILL\n→ "+tgtNpc.name+" сопротивляется…"});
+  } else {
+    pr.addLog({who:c.name||"???",type:"magic",label:"✨ "+(mInt||"Чудо")+" — каст удался (d6="+cc+")",detail:"нет цели",total:0});
+    oR({label:mInt||"✨ Чудо",d10:null,parts:[{label:"d6",value:cc}],total:0,subtext:(mInt?"«"+mInt+"»\n":"")+"✅ Каст удался (d6="+cc+") — выбери цель\n−1 WILL"});
+  }
   sMInt("");
 }} style={{padding:7,borderRadius:7,border:"2px solid #7c3aed20",background:"#1f1330",cursor:"pointer",fontWeight:700,fontSize:10,color:"#a78bfa"}}>{"✨ Сотворить чудо (−1W) "+(curW<=0?"⛔":"")+(tgtNpc?" → "+tgtNpc.name:"")}</button></div>}
 
