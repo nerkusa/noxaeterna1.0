@@ -12,8 +12,8 @@ export default function GMRoll(pr) {
   const [act, setAct] = useState('');
   const [qty, setQty] = useState(1);
   const [die, setDie] = useState(8);
-  const [mod, setMod] = useState(0);
-  const [modLbl, setModLbl] = useState('');
+  const [stat, setStat] = useState(0);
+  const [skill, setSkill] = useState(0);
   const [res, setRes] = useState(null);
 
   function roll() {
@@ -21,13 +21,12 @@ export default function GMRoll(pr) {
     const rolls = [];
     for (let i = 0; i < n; i++) rolls.push(r1(die));
     const sum = rolls.reduce(function (a, b) { return a + b; }, 0);
-    const m = parseInt(mod) || 0;
-    const total = sum + m;
-    const dicePart = n + 'd' + die + '[' + rolls.join(',') + ']';
-    const modPart = m ? (modLbl ? ' + ' + modLbl + '(' + m + ')' : (m > 0 ? ' + ' + m : ' − ' + Math.abs(m))) : '';
-    const detail = dicePart + modPart + ' = ' + total;
-    setRes({ act: act, rolls: rolls, total: total, detail: detail });
-    if (addLog) addLog({ who: '🎲 ГМ' + (act ? ' — ' + act : ''), type: 'gm_roll', label: (modLbl ? modLbl + ': ' : '') + detail, detail: '', total: total });
+    const st = parseInt(stat) || 0;
+    const sk = parseInt(skill) || 0;
+    const total = sum + st + sk;
+    const detail = n + 'd' + die + '[' + rolls.join(',') + ']' + (st ? ' + хар(' + st + ')' : '') + (sk ? ' + навык(' + sk + ')' : '') + ' = ' + total;
+    setRes({ act: act, total: total, detail: detail });
+    if (addLog) addLog({ who: '🎲 ГМ' + (act ? ' — ' + act : ''), type: 'gm_roll', label: detail, detail: '', total: total });
   }
 
   return (
@@ -38,7 +37,7 @@ export default function GMRoll(pr) {
       </button>
       {open && (
         <div style={{ padding: '0 10px 10px', display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <div><label style={lbl}>Действие (необязательно)</label><input value={act} onChange={function (e) { setAct(e.target.value); }} placeholder="напр. Скрытность стражника" style={Object.assign({}, inp, { width: '100%' })} /></div>
+          <div><label style={lbl}>Действие</label><input value={act} onChange={function (e) { setAct(e.target.value); }} placeholder="напр. Скрытность стражника" style={Object.assign({}, inp, { width: '100%' })} /></div>
           <div style={{ display: 'flex', gap: 6 }}>
             <div style={{ width: 52 }}><label style={lbl}>Кол-во</label><input type="number" min="1" value={qty} onChange={function (e) { setQty(e.target.value); }} style={Object.assign({}, inp, { width: '100%' })} /></div>
             <div style={{ flex: 1 }}><label style={lbl}>Кость</label>
@@ -51,10 +50,10 @@ export default function GMRoll(pr) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <div style={{ flex: 1 }}><label style={lbl}>Навык / модификатор (название)</label><input value={modLbl} onChange={function (e) { setModLbl(e.target.value); }} placeholder="напр. Stealth" style={Object.assign({}, inp, { width: '100%' })} /></div>
-            <div style={{ width: 64 }}><label style={lbl}>Число +/−</label><input type="number" value={mod} onChange={function (e) { setMod(e.target.value); }} style={Object.assign({}, inp, { width: '100%' })} /></div>
+            <div style={{ flex: 1 }}><label style={lbl}>+ Характеристика (число)</label><input type="number" value={stat} onChange={function (e) { setStat(e.target.value); }} style={Object.assign({}, inp, { width: '100%' })} /></div>
+            <div style={{ flex: 1 }}><label style={lbl}>+ Навык (число)</label><input type="number" value={skill} onChange={function (e) { setSkill(e.target.value); }} style={Object.assign({}, inp, { width: '100%' })} /></div>
           </div>
-          <button onClick={roll} style={{ padding: 10, borderRadius: 8, border: 'none', background: CLR, color: '#231b08', fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 13, cursor: 'pointer' }}>🎲 Бросить {qty + 'd' + die}{(parseInt(mod) || 0) ? ((parseInt(mod) || 0) > 0 ? ' +' + mod : ' ' + mod) : ''}</button>
+          <button onClick={roll} style={{ padding: 10, borderRadius: 8, border: 'none', background: CLR, color: '#231b08', fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 13, cursor: 'pointer' }}>🎲 Бросить {qty + 'd' + die}{(parseInt(stat) || 0) ? ' +' + (parseInt(stat) || 0) : ''}{(parseInt(skill) || 0) ? ' +' + (parseInt(skill) || 0) : ''}</button>
           {res && (
             <div style={{ background: '#1d1a14', border: '1px solid ' + CLR + '30', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
               {res.act && <div style={{ fontSize: 10, color: CLR, fontWeight: 700, marginBottom: 2 }}>{res.act}</div>}
