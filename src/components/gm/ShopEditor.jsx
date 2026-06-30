@@ -106,9 +106,9 @@ export default function ShopEditor(pr) {
             {field('Бонус', <input type="number" value={it.bonus} onChange={function (e) { upd(it.id, { bonus: parseInt(e.target.value) || 0 }); }} style={inp} />)}
             {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} style={inp} />)}
           </div>
-          {it.dmgType === 'П' && (
+          {(it.dmgType === 'П' || it.wtype === 'Archery') && (
             <div style={{ display: 'flex', gap: 6 }}>
-              {field('🔫 Обойма (патронов)', <input type="number" value={it.clip || 6} onChange={function (e) { upd(it.id, { clip: parseInt(e.target.value) || 1 }); }} style={inp} />)}
+              {field(it.wtype === 'Archery' ? '🏹 Колчан (выстрелов)' : '🔫 Обойма (патронов)', <input type="number" value={it.clip || 1} onChange={function (e) { upd(it.id, { clip: parseInt(e.target.value) || 1 }); }} style={inp} />)}
             </div>
           )}
           {it.hands === 1.5 && (
