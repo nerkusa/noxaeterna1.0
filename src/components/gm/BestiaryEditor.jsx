@@ -11,6 +11,11 @@ import PlayerAttackNotif from '../combat/PlayerAttackNotif';
 import RollPopup from '../combat/RollPopup';
 import InitiativeBar from '../combat/InitiativeBar';
 
+/* Встроенная рукопашная атака — есть у каждого NPC изначально */
+var FIST={name:"Кулаки",dice:"1d6",dmgType:"Д",bonus:0,type:"Brawl"};
+/* Навыки NPC и характеристика, от которой кидается бросок */
+var NPC_SK=[{k:"dodge",l:"Dodge",st:"DEX"},{k:"resist",l:"Resistance",st:"BODY"},{k:"brawl",l:"Brawl",st:"BODY"},{k:"battleWeapon",l:"Battle Wpn",st:"REF"},{k:"simpleWeapon",l:"Simple Wpn",st:"REF"},{k:"guns",l:"Guns",st:"REF"},{k:"archery",l:"Archery",st:"REF"},{k:"athletics",l:"Athletics",st:"BODY"},{k:"spellcast",l:"Miracle",st:"WILL"},{k:"mresist",l:"Miracle Resist",st:"WILL"}];
+
 function BestiaryEditor(pr){
 var templ=pr.npcTempl||{};var spawned=pr.spawned||{};
 var _cat=useState(null);var selCat=_cat[0];var sCat=_cat[1];
@@ -25,6 +30,7 @@ var _naim=useState(false);var npcAim=_naim[0];var sNpcAim=_naim[1];
 var _nn=useState("");var nn=_nn[0];var sNN=_nn[1];var _nl=useState(1);var nl=_nl[0];var sNL=_nl[1];var _nhp=useState(20);var nhp=_nhp[0];var sNHP=_nhp[1];
 var _nstats=useState({INT:3,REF:3,DEX:3,BODY:3,EMP:1,CRA:1,WILL:3});var nstats=_nstats[0];var sNStats=_nstats[1];
 var _nskills=useState({dodge:2,resist:2});var nskills=_nskills[0];var sNSkills=_nskills[1];
+var _skn=useState(null);var skNpc=_skn[0];var sSkNpc=_skn[1];
 var _nweapons=useState([]);var nweapons=_nweapons[0];var sNWeapons=_nweapons[1];
 var _nar=useState("none");var nar=_nar[0];var sNAR=_nar[1];var _narh=useState(10);var narh=_narh[0];var sNARH=_narh[1];
 var _narbod=useState("none");var narbod=_narbod[0];var sNARBOD=_narbod[1];var _narbh=useState(10);var narbh=_narbh[0];var sNARBH=_narbh[1];
@@ -46,7 +52,7 @@ function despawn(id){var sp=Object.assign({},spawned);delete sp[id];pr.saveSpawn
 function updateSpawned(id,data){var sp=Object.assign({},spawned);sp[id]=data;pr.saveSpawned(sp)}
 function rollInitiative(){
   var list=[];
-  playerChars.forEach(function(pc){var inf=cF(pc);var rv=inf.fs.REF||0;var R=rollHit();list.push({id:pc._fbId,name:pc.name||"?",kind:"player",init:R.d+rv})});
+  (pr.characters||[]).filter(function(x){return x.active}).forEach(function(pc){var inf=cF(pc);var rv=inf.fs.REF||0;var R=rollHit();list.push({id:pc._fbId,name:pc.name||"?",kind:"player",init:R.d+rv})});
   Object.entries(spawned).forEach(function(e){var id=e[0];var s=e[1];var hp=s.hp!==undefined?s.hp:s.maxHp;if(hp<=0)return;var rv=(s.stats||{}).REF||0;var R=rollHit();list.push({id:id,name:s.name,kind:"npc",init:R.d+rv})});
   if(!list.length)return;
   list.sort(function(a,b){return b.init-a.init});
@@ -85,6 +91,7 @@ function npcAttack(s,w){
   var st=s.stats||{};var sk=s.skills||{};
   var rv,skVal,skNm,atName;
   if(w.magic){rv=st.WILL||0;skVal=sk.spellcast||0;skNm="Spellcast";atName="WILL";}
+  else if(w.type==="Brawl"){rv=st.BODY||0;skVal=sk.brawl||0;skNm="Brawl";atName="BODY";}
   else{var skMap={Battle:"battleWeapon",Simple:"simpleWeapon",Guns:"guns",Archery:"archery"};skVal=sk[skMap[w.type]]||0;rv=st.REF||0;skNm=w.type;atName="REF";}
   var R=rollHit();var d=R.d;var aimP=(npcAim&&playerTgtId)?aimPen(playerZone):0;var t=d+rv+skVal+(w.bonus||0)-aimP;
   var tgtChar=playerTgtId?playerChars.find(function(x){return x._fbId===playerTgtId}):null;
@@ -196,15 +203,21 @@ return <div key={id} style={{background:"#262219",border:"1px solid #322d24",bor
 {s.armorHead&&s.armorHead!=="none"&&<div style={{fontSize:7,color:"#94a3b8",marginTop:1}}>🧠 {s.armorHead} {s.armorHeadHp||0}/{s.armorHeadMaxHp||0}</div>}
 {s.armorBody&&s.armorBody!=="none"&&<div style={{fontSize:7,color:"#94a3b8"}}>🫀 {s.armorBody} {s.armorBodyHp||0}/{s.armorBodyMaxHp||0}</div>}
 <div style={{display:"flex",gap:2,marginTop:3,flexWrap:"wrap"}}>
-{wpns.length>0?wpns.map(function(w,wi){return <div key={wi} style={{display:"flex",gap:1,marginBottom:1}}>
+<div style={{display:"flex",gap:1,marginBottom:1}}>
+<button onClick={function(){npcAttack(s,FIST)}} title="Рукопашная (BODY+Brawl)" style={{padding:"2px 5px",borderRadius:4,border:"1px solid #f59e0b40",background:"#231b08",fontSize:7,fontWeight:700,color:"#f0b352",cursor:"pointer"}}>{"👊 Кулаки"+(playerTgtId?" →":"")}</button>
+<button onClick={function(){npcDmg(s,FIST)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #ef444420",background:"#2a1414",fontSize:7,fontWeight:700,color:"#dc2626",cursor:"pointer"}}>{"💥"+(playerTgtId?" →":"")}</button>
+</div>
+{wpns.map(function(w,wi){return <div key={wi} style={{display:"flex",gap:1,marginBottom:1}}>
 <button onClick={function(){npcAttack(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid "+(w.magic?"#7c3aed40":"#3b82f620"),background:w.magic?"#1f1330":"#0e1a2b",fontSize:7,fontWeight:700,color:w.magic?"#a78bfa":"#60a5fa",cursor:"pointer"}}>{(w.magic?"🔮 ":"🎯 ")+w.name+(playerTgtId?" →":"")}</button>
 <button onClick={function(){npcDmg(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #ef444420",background:"#2a1414",fontSize:7,fontWeight:700,color:"#dc2626",cursor:"pointer"}}>{"💥"+(playerTgtId?" →":"")}</button>
-</div>}):
-<button onClick={function(){var R=rollHit();var d=R.d;var t=d+(st.REF||0);sRollP({label:s.name+" Атака",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"REF",value:st.REF||0}],total:t});pr.addLog({who:s.name,type:"hit",label:"🎯 Атака"+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + REF("+(st.REF||0)+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #3b82f620",background:"#0e1a2b",fontSize:8,fontWeight:700,color:"#60a5fa",cursor:"pointer"}}>🎯 Атака</button>}
+</div>})}
 <button onClick={function(){npcMagic(s,id)}} style={{padding:"3px 5px",borderRadius:4,border:"1px solid #7c3aed20",background:"#1f1330",fontSize:7,fontWeight:700,color:"#7c3aed",cursor:"pointer"}}>{"🔮"+(playerTgtId?" →":"")}</button>
 <button onClick={function(){var R=rollHit();var d=R.d;var dv=st.DEX||0;var dg=sk.dodge||0;var t=d+dv+dg;sRollP({label:s.name+" — Уклонение",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"DEX",value:dv},{label:"Dodge",value:dg}],total:t});pr.addLog({who:s.name,type:"dodge",label:"🛡️ Уклонение"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + DEX("+dv+") + Dodge("+dg+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #10b98120",background:"#0e2018",fontSize:8,fontWeight:700,color:"#34d399",cursor:"pointer"}}>🛡️ Уклон.</button>
 <button onClick={function(){var R=rollHit();var d=R.d;var wv=st.WILL||0;var mr=sk.mresist||0;var t=d+wv+mr;sRollP({label:s.name+" — Сопр. чуду",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"WILL",value:wv},{label:"M.Resist",value:mr}],total:t});pr.addLog({who:s.name,type:"magic",label:"✨ Сопротивление чуду"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + WILL("+wv+") + M.Resist("+mr+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #7c3aed20",background:"#1f1330",fontSize:8,fontWeight:700,color:"#a78bfa",cursor:"pointer"}}>✨ Сопр.</button>
-</div></div>})}
+<button onClick={function(){sSkNpc(skNpc===id?null:id)}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #f59e0b30",background:"#231b08",fontSize:8,fontWeight:700,color:"#f0b352",cursor:"pointer"}}>{skNpc===id?"🎲 ✕":"🎲 Навык"}</button>
+</div>
+{skNpc===id&&<div style={{display:"flex",flexWrap:"wrap",gap:2,marginTop:3,padding:4,background:"#1d1a14",borderRadius:5}}>{NPC_SK.map(function(it){var stv=st[it.st]||0;var skv=sk[it.k]||0;return <button key={it.k} onClick={function(){var R=rollHit();var d=R.d;var t=d+stv+skv;sRollP({label:s.name+" — "+it.l,d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:it.st,value:stv},{label:it.l,value:skv}],total:t});pr.addLog({who:s.name,type:"skill",label:"🎲 "+it.l+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + "+it.st+"("+stv+") + "+it.l+"("+skv+") = "+t,total:t})}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #322d24",background:"#262219",fontSize:7,fontWeight:700,color:skv>0?"#ece5d8":"#a89a82",cursor:"pointer"}}>{it.l+" ("+it.st+"+"+skv+")"}</button>})}</div>}
+</div>})}
 </div>}
 
 {/* Категории */}
