@@ -25,6 +25,7 @@ export default function PartyView(pr) {
             <div style={{ padding: '0 9px 7px', fontSize: 10, color: '#cabfa9' }}>{'❤️ ' + hp + '/' + mx + '   🔥 ' + w + '/' + mxW}</div>
             {open && (
               <div style={{ padding: '0 9px 9px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {(c.portrait || c.hair) && <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>{c.portrait && <img src={c.portrait} alt="" style={{ width: 44, height: 44, borderRadius: 8, objectFit: 'cover', border: '1px solid #322d24', flexShrink: 0 }} />}{c.hair && <div style={{ fontSize: 8, color: '#a89a82', fontStyle: 'italic', flex: 1, lineHeight: 1.5 }}>{c.hair}</div>}</div>}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>{SD.map(function (s) { return <span key={s.key} style={{ fontSize: 8, fontWeight: 700, color: s.color, background: s.color + '14', borderRadius: 5, padding: '2px 5px' }}>{s.emoji + ' ' + s.key + ' ' + (fs[s.key] || 0)}</span>; })}</div>
                 <div>
                   <div style={{ fontSize: 8, fontWeight: 700, color: '#a89a82', marginBottom: 2 }}>Навыки</div>
