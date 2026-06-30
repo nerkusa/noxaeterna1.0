@@ -12,7 +12,10 @@ const CATS = [
   { id: 'weapon', name: '⚔️ Оружие', color: '#3b82f6' },
   { id: 'shield', name: '🛡 Щиты', color: '#0ea5e9' },
   { id: 'item', name: '🎒 Расходники', color: '#f59e0b' },
+  { id: 'tool', name: '🔧 Инструменты', color: '#a78bfa' },
 ];
+
+const REPAIR_DICE = ['1d4', '1d6', '1d8', '1d10', '1d12'];
 
 export const SHIELD_T = [
   { id: 'light', name: 'Лёгкий', absorb: 0.5, bodyReq: 4 },
@@ -46,6 +49,7 @@ export default function ShopEditor(pr) {
       weapon: { cat: 'weapon', name: 'Новое оружие', wtype: 'Battle', dmgDice: '1d6', dmgType: 'Р', hands: 1, bonus: 0, dmgDice2h: '2d6', bonus2h: 0, price: '' },
       shield: { cat: 'shield', name: 'Новый щит', type: 'light', hp: 15, price: '' },
       item: { cat: 'item', name: 'Новый предмет', desc: '', price: '' },
+      tool: { cat: 'tool', name: 'Лёгкий набор инструментов', dice: '1d4', desc: 'Починка брони', price: '' },
     }[cat];
     const it = Object.assign({ id: uid() }, base);
     persist(shop.concat([it]));
@@ -59,6 +63,7 @@ export default function ShopEditor(pr) {
     if (it.cat === 'armor') { const a = ARMOR_T.find(function (x) { return x.id === it.type; }); return (a ? a.name : it.type) + ' · ' + it.hp + ' HP'; }
     if (it.cat === 'shield') { const s = SHIELD_T.find(function (x) { return x.id === it.type; }); return (s ? s.name + ' ' + (s.absorb * 100) + '%' : it.type) + ' · ' + it.hp + ' HP'; }
     if (it.cat === 'weapon') { const h = it.hands === 2 ? 'двуруч.' : it.hands === 1.5 ? 'полуторн.' : 'одноруч.'; return it.wtype + ' · ' + it.dmgDice + (it.bonus ? '+' + it.bonus : '') + ' · ' + it.dmgType + ' · ' + h; }
+    if (it.cat === 'tool') { return '🔧 Починка ' + (it.dice || '1d4') + (it.desc ? ' · ' + it.desc : ''); }
     return it.desc || '';
   }
 
@@ -107,6 +112,19 @@ export default function ShopEditor(pr) {
               {field('Бонус (2 руки)', <input type="number" value={it.bonus2h} onChange={function (e) { upd(it.id, { bonus2h: parseInt(e.target.value) || 0 }); }} style={inp} />)}
             </div>
           )}
+        </div>
+      );
+    }
+    if (it.cat === 'tool') {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
+          {field('Название', <input value={it.name} onChange={function (e) { upd(it.id, { name: e.target.value }); }} placeholder="Лёгкий / Средний / Тяжёлый набор" style={inp} />)}
+          <div style={{ display: 'flex', gap: 6 }}>
+            {field('Кубик починки', <select value={it.dice || '1d4'} onChange={function (e) { upd(it.id, { dice: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{REPAIR_DICE.map(function (d) { return <option key={d} value={d}>{d}</option>; })}</select>)}
+            {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} placeholder="напр. 100" style={inp} />)}
+          </div>
+          {field('Описание', <input value={it.desc} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} style={inp} />)}
+          <div style={{ fontSize: 8, color: '#a89a82', fontStyle: 'italic' }}>Этим кубиком игрок чинит броню (1 раз в день). У Ремесленника добавляется +CRA.</div>
         </div>
       );
     }
