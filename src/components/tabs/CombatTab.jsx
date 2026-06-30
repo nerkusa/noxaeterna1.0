@@ -57,11 +57,11 @@ return(<div style={{display:"flex",flexDirection:"column",gap:8}}>
 <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11}}>🔥 WILL</span>
 <div style={{display:"flex",alignItems:"center",gap:2}}><button onClick={function(){sv(Object.assign({},c,{curWill:Math.max(0,curW-1)}))}} style={S.sm}>−</button><span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#8b5cf6"}}>{curW+"/"+mxW}</span><button onClick={function(){sv(Object.assign({},c,{curWill:Math.min(mxW,curW+1)}))}} style={S.sm}>+</button></div>
 </div>
-<button onClick={function(){sv(Object.assign({},c,{curHp:mx,curWill:mxW,warriorBonus:false,warriorBonusUsed:false,sensitiveBonus:false,customStance:false,merchantUsed:false}));pr.addLog({who:c.name||"???",type:"rest",label:"💤 Отдых — способности восстановлены",detail:"",total:0})}} style={{padding:"5px 10px",borderRadius:9,border:"2px solid #10b98120",background:"#0e2018",fontWeight:700,fontSize:10,color:"#34d399",cursor:"pointer"}}>💤</button>
+<button onClick={function(){sv(Object.assign({},c,{curHp:mx,curWill:mxW,warriorBonus:false,warriorBonusUsed:false,sensitiveBonus:false,customStance:false,merchantUsed:false,repairUsed:false}));pr.addLog({who:c.name||"???",type:"rest",label:"💤 Отдых — способности восстановлены",detail:"",total:0})}} style={{padding:"5px 10px",borderRadius:9,border:"2px solid #10b98120",background:"#0e2018",fontWeight:700,fontSize:10,color:"#34d399",cursor:"pointer"}}>💤</button>
 </div>
 
 {/* Броня игрока */}
-<ArmorSection char={c} save={sv} finalStats={fs} shop={pr.shop}/>
+<ArmorSection char={c} save={sv} finalStats={fs} shop={pr.shop} characters={pr.characters} room={pr.room} addLog={pr.addLog} onRoll={oR}/>
 
 {/* NPC цели — видны всем игрокам */}
 {spawnedArr.length>0&&<div style={{border:"2px solid #ef444428",borderRadius:9,padding:"6px 8px",background:"#2a1414"}}>
