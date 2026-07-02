@@ -5,7 +5,7 @@ const LEGACY = {};
 LORE_CH.forEach(function (c) { LEGACY[c.id] = c; });
 
 export const MAP_META = LORE_CH.find(function (c) { return c.id === 'map'; })
-  || { id: 'map', title: 'Карта Аэтернии', icon: '🗺️', color: '#10b981' };
+  || { id: 'map', title: 'Карта Мидфаля', icon: '🗺️', color: '#10b981' };
 
 export const LORE_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#f97316', '#d97706', '#7c3aed', '#ec4899', '#64748b'];
 export const LORE_ICONS = ['📖', '📜', '👥', '🛒', '🌍', '🏰', '🌊', '🧝', '⛏️', '🌙', '🐎', '🐉', '⚡', '💀', '⚔️', '👑', '🔮', '🗡️', '🛡️', '🏔️', '🌲', '🔥', '❄️', '🏛️'];
