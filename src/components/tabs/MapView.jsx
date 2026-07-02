@@ -12,6 +12,10 @@ var mapSwitch=(<div style={{display:"flex",gap:4,marginBottom:2}}>
   <button onClick={function(){sView("local");sZoom(1)}} style={{flex:1,padding:"6px 4px",borderRadius:7,border:"2px solid #10b981"+(isWorld?"20":""),background:isWorld?"#1d1a14":"#0e2018",color:"#34d399",fontWeight:700,fontSize:10,cursor:"pointer"}}>🏠 Локальная</button>
   <button onClick={function(){sView("world");sZoom(1)}} style={{flex:1,padding:"6px 4px",borderRadius:7,border:"2px solid #3b82f6"+(isWorld?"":"20"),background:isWorld?"#0e1a2b":"#1d1a14",color:"#60a5fa",fontWeight:700,fontSize:10,cursor:"pointer"}}>🌍 Масштабная (1:1)</button>
 </div>);
+var mapTitle=md.title||"Карта Мидфаля";
+var titleBar=isGM
+  ?<input value={md.title||""} onChange={function(e){if(sMD)sMD(Object.assign({},md,{title:e.target.value}))}} placeholder="Карта Мидфаля" style={{width:"100%",boxSizing:"border-box",textAlign:"center",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,background:"#1d1a14",color:"#ece5d8",border:"2px solid #322d24",borderRadius:8,padding:"4px 8px",outline:"none",marginBottom:4}}/>
+  :<div style={{textAlign:"center",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#ece5d8",marginBottom:4}}>{mapTitle}</div>;
 var _dr=useState(null);var drId=_dr[0];var sDrId=_dr[1];
 var _off=useState({x:0,y:0});var drOff=_off[0];var sDrOff=_off[1];
 var _live=useState(null);var liveT=_live[0];var sLiveT=_live[1];
@@ -56,8 +60,9 @@ function onMv(e){
   if(pan){var el=contRef.current;if(!el)return;var cx=e.touches?e.touches[0].clientX:e.clientX;var cy=e.touches?e.touches[0].clientY:e.clientY;el.scrollLeft=pan.sl-(cx-pan.x);el.scrollTop=pan.st-(cy-pan.y)}
 }
 function endDr(){if(drId&&liveT){saveTk(liveT);}sDrId(null);sLiveT(null);sPan(null)}
-if(!img)return <div style={{display:"flex",flexDirection:"column",gap:6}}>{mapSwitch}<div style={{textAlign:"center",padding:"24px 10px"}}><div style={{fontSize:40}}>🗺️</div><div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14}}>{isWorld?"Масштабная карта (1:1)":"Локальная карта"}</div>{isGM?<label style={{display:"inline-block",marginTop:10,padding:"10px 20px",borderRadius:8,border:"2px dashed #10b981",background:"#0e2018",fontWeight:700,fontSize:12,color:"#34d399",cursor:"pointer"}}>📁 Загрузить карту<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setImg(ev.target.result)};r.readAsDataURL(f)}}/></label>:<div style={{fontSize:10,color:"#a89a82",marginTop:8}}>Мастер ещё не загрузил карту</div>}</div></div>;
+if(!img)return <div style={{display:"flex",flexDirection:"column",gap:6}}>{titleBar}{mapSwitch}<div style={{textAlign:"center",padding:"24px 10px"}}><div style={{fontSize:40}}>🗺️</div><div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14}}>{isWorld?"Масштабная карта (1:1)":"Локальная карта"}</div>{isGM?<label style={{display:"inline-block",marginTop:10,padding:"10px 20px",borderRadius:8,border:"2px dashed #10b981",background:"#0e2018",fontWeight:700,fontSize:12,color:"#34d399",cursor:"pointer"}}>📁 Загрузить карту<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setImg(ev.target.result)};r.readAsDataURL(f)}}/></label>:<div style={{fontSize:10,color:"#a89a82",marginTop:8}}>Мастер ещё не загрузил карту</div>}</div></div>;
 return <div style={{display:"flex",flexDirection:"column",gap:6}}>
+{titleBar}
 {mapSwitch}
 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
   <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13}}>{isWorld?"🌍 Масштабная":"🏠 Локальная"}</div>
