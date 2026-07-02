@@ -177,6 +177,27 @@ function npcVsNpc(s,w){
   pr.addLog({who:s.name,type:"dmg",label:"🤝 "+s.name+" → "+tgt.name+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP"+(R.crit?" 🌟":""),detail:hit+" vs "+dodge+" | "+ae.desc+" | ❤️ "+(tgt.hp||0)+"→"+newHp,total:ae.hd});
   sRollP({label:s.name+" → "+tgt.name,d10:R.d,crit:R.crit,fumble:R.fumble,parts:[{label:atName,value:rv},{label:"нав",value:skVal}],total:hit,subtext:"💥 "+ae.hd+" урона ("+zoneObj.name+")\n❤️ "+(tgt.hp||0)+"→"+newHp});
 }
+/* Союзный NPC-маг творит чудо по вражескому NPC — d6 проверка → контест против Miracle Resist цели */
+function npcMagicNpc(s,npcSpawnId){
+  if(!npcTgtId){alert("Выбери цель-NPC (враг) сверху");return}
+  var tgt=spawned[npcTgtId];if(!tgt){alert("Цель не найдена");return}
+  var st=s.stats||{};var cbon=sm(rN(1,6));var ft=sm(rN(3,12))+cbon;var cc=r1(6);
+  if(cc<=3){
+    if(cc<=2){var sp2=Object.assign({},pr.spawned||{});sp2[npcSpawnId]=Object.assign({},s,{hp:Math.max(0,(s.hp||0)-ft)});pr.saveSpawned(sp2);pr.addLog({who:s.name,type:"magic_fail",label:"💥 "+s.name+" — срыв чуда (d6="+cc+")! По СЕБЕ: "+ft,detail:"",total:ft});sRollP({label:s.name+" 🔮 Срыв",d10:null,parts:[{label:"d6",value:cc}],total:ft,subtext:"💥 По себе: "+ft});}
+    else{var others=Object.entries(pr.spawned||{}).filter(function(e){return e[0]!==npcSpawnId&&((e[1].hp!==undefined?e[1].hp:e[1].maxHp)>0)});if(others.length){var oe=others[Math.floor(Math.random()*others.length)];var oid=oe[0];var os=oe[1];var sp3=Object.assign({},pr.spawned||{});sp3[oid]=Object.assign({},os,{hp:Math.max(0,(os.hp||0)-ft)});pr.saveSpawned(sp3);pr.addLog({who:s.name,type:"magic_fail",label:"🔥 "+s.name+" — срыв чуда (d6=3)! По "+os.name+": "+ft,detail:"",total:ft});sRollP({label:s.name+" 🔮 Срыв",d10:null,parts:[{label:"d6",value:cc}],total:ft,subtext:"🔥 По "+os.name+": "+ft});}else{pr.addLog({who:s.name,type:"magic_fail",label:"🔥 "+s.name+" — срыв чуда, но рядом никого",detail:"",total:0});sRollP({label:s.name+" 🔮 Срыв",d10:null,parts:[{label:"d6",value:cc}],total:0,subtext:"🔥 Срыв — никого рядом"});}}
+    return;
+  }
+  var will=st.WILL||0;var msk=(s.skills||{}).spellcast||0;var R=rollHit();var hitC=R.d+will+msk;
+  var tst=tgt.stats||{};var tsk=tgt.skills||{};var D=rollHit();var res=D.d+(tst.WILL||0)+(tsk.mresist||0);
+  if(res>=hitC){pr.addLog({who:s.name,type:"magic",label:"✨ "+tgt.name+" устоял против чуда "+s.name,detail:hitC+" vs "+res,total:hitC});sRollP({label:s.name+" 🔮 → "+tgt.name,d10:R.d,crit:R.crit,parts:[{label:"WILL",value:will},{label:"Miracle",value:msk}],total:hitC,subtext:"✨ Устоял ("+res+")"});return;}
+  var crit=R.crit?1.5:1;var rawDmg=Math.floor(ft*crit);var zoneD=r1(6);var zoneObj=ZONES[zoneD-1];var mult=Math.floor(rawDmg*zoneObj.mult);
+  var at=zoneObj.slot==="head"?(tgt.armorHead||"none"):(tgt.armorBody||"none");var ahp=zoneObj.slot==="head"?(tgt.armorHeadHp||0):(tgt.armorBodyHp||0);if(ahp<=0)at="none";
+  var ae=zoneObj.ignoreArmor?{ad:0,hd:mult,desc:"🔓"+zoneObj.name}:calcAE(at,"Д",mult);
+  var newHp=Math.max(0,(tgt.hp||0)-ae.hd);var upd=Object.assign({},tgt,{hp:newHp});if(ae.ad>0){if(zoneObj.slot==="head")upd.armorHeadHp=Math.max(0,(tgt.armorHeadHp||0)-ae.ad);else upd.armorBodyHp=Math.max(0,(tgt.armorBodyHp||0)-ae.ad);}
+  updateSpawned(npcTgtId,upd);
+  pr.addLog({who:s.name,type:"magic",label:"🔮 "+s.name+" → "+tgt.name+" "+ae.hd+" HP"+(R.crit?" 🌟":""),detail:hitC+" vs "+res+" | "+ae.desc+" | ❤️ "+(tgt.hp||0)+"→"+newHp,total:ae.hd});
+  sRollP({label:s.name+" 🔮 → "+tgt.name,d10:R.d,crit:R.crit,parts:[{label:"WILL",value:will},{label:"Miracle",value:msk}],total:hitC,subtext:"💥 "+ae.hd+" урона ("+zoneObj.name+")\n❤️ "+(tgt.hp||0)+"→"+newHp});
+}
 
 return(<div style={{flex:1,display:"flex",flexDirection:"column"}}>
 <RollPopup roll={rollP} onClose={function(){sRollP(null)}}/>
@@ -235,7 +256,7 @@ return <div key={id} style={{background:"#262219",border:"1px solid #322d24",bor
 <button onClick={function(){s.side==="ally"?npcVsNpc(s,w):npcAttack(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid "+(w.magic?"#7c3aed40":"#3b82f620"),background:w.magic?"#1f1330":"#0e1a2b",fontSize:7,fontWeight:700,color:w.magic?"#a78bfa":"#60a5fa",cursor:"pointer"}}>{(w.magic?"🔮 ":"🎯 ")+w.name+(s.side==="ally"?(npcTgtId?" ⚔️":""):(playerTgtId?" →":""))}</button>
 {s.side!=="ally"&&<button onClick={function(){npcDmg(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #ef444420",background:"#2a1414",fontSize:7,fontWeight:700,color:"#dc2626",cursor:"pointer"}}>{"💥"+(playerTgtId?" →":"")}</button>}
 </div>})}
-<button onClick={function(){npcMagic(s,id)}} style={{padding:"3px 5px",borderRadius:4,border:"1px solid #7c3aed20",background:"#1f1330",fontSize:7,fontWeight:700,color:"#7c3aed",cursor:"pointer"}}>{"🔮"+(playerTgtId?" →":"")}</button>
+<button onClick={function(){s.side==="ally"?npcMagicNpc(s,id):npcMagic(s,id)}} style={{padding:"3px 5px",borderRadius:4,border:"1px solid #7c3aed20",background:"#1f1330",fontSize:7,fontWeight:700,color:"#7c3aed",cursor:"pointer"}}>{"🔮"+(s.side==="ally"?(npcTgtId?" ⚔️":""):(playerTgtId?" →":""))}</button>
 <button onClick={function(){var R=rollHit();var d=R.d;var dv=st.DEX||0;var dg=sk.dodge||0;var t=d+dv+dg;sRollP({label:s.name+" — Уклонение",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"DEX",value:dv},{label:"Dodge",value:dg}],total:t});pr.addLog({who:s.name,type:"dodge",label:"🛡️ Уклонение"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + DEX("+dv+") + Dodge("+dg+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #10b98120",background:"#0e2018",fontSize:8,fontWeight:700,color:"#34d399",cursor:"pointer"}}>🛡️ Уклон.</button>
 <button onClick={function(){var R=rollHit();var d=R.d;var wv=st.WILL||0;var mr=sk.mresist||0;var t=d+wv+mr;sRollP({label:s.name+" — Сопр. чуду",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"WILL",value:wv},{label:"M.Resist",value:mr}],total:t});pr.addLog({who:s.name,type:"magic",label:"✨ Сопротивление чуду"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + WILL("+wv+") + M.Resist("+mr+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #7c3aed20",background:"#1f1330",fontSize:8,fontWeight:700,color:"#a78bfa",cursor:"pointer"}}>✨ Сопр.</button>
 <button onClick={function(){sSkNpc(skNpc===id?null:id)}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #f59e0b30",background:"#231b08",fontSize:8,fontWeight:700,color:"#f0b352",cursor:"pointer"}}>{skNpc===id?"🎲 ✕":"🎲 Навык"}</button>
