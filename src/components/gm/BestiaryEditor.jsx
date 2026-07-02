@@ -24,6 +24,7 @@ var _cn=useState("");var catName=_cn[0];var sCatName=_cn[1];
 var _rp=useState(null);var rollP=_rp[0];var sRollP=_rp[1];
 /* target selection for NPC attacks */
 var _ptgt=useState(null);var playerTgtId=_ptgt[0];var sPlayerTgt=_ptgt[1];
+var _ntgt=useState(null);var npcTgtId=_ntgt[0];var sNpcTgt=_ntgt[1];
 var _pzone=useState("Торс");var playerZone=_pzone[0];var sPlayerZone=_pzone[1];
 var _naim=useState(false);var npcAim=_naim[0];var sNpcAim=_naim[1];
 /* NPC form state */
@@ -154,6 +155,28 @@ function npcMagic(s,npcSpawnId){
     sRollP({label:s.name+" 🔮 Чудо",d10:R.d,crit:R.crit,parts:[{label:"WILL",value:will},{label:"Miracle",value:msk}],total:hitC,subtext:"Каст удался — нет цели"});
   }
 }
+/* Союзный NPC бьёт вражеского NPC — ГМ разрешает всё сам (бросок атаки vs уклонение → урон) */
+function npcVsNpc(s,w){
+  if(!npcTgtId){alert("Выбери цель-NPC (враг) сверху");return}
+  var tgt=spawned[npcTgtId];if(!tgt){alert("Цель не найдена");return}
+  var st=s.stats||{};var sk=s.skills||{};
+  var rv,skVal,atName;
+  if(w.magic){rv=st.WILL||0;skVal=sk.spellcast||0;atName="WILL";}
+  else if(w.type==="Brawl"){rv=st.BODY||0;skVal=sk.brawl||0;atName="BODY";}
+  else{var skMap={Battle:"battleWeapon",Simple:"simpleWeapon",Guns:"guns",Archery:"archery"};skVal=sk[skMap[w.type]]||0;rv=st.REF||0;atName="REF";}
+  var R=rollHit();var hit=R.d+rv+skVal+(w.bonus||0);
+  var tst=tgt.stats||{};var tsk=tgt.skills||{};var D=rollHit();var dodge=D.d+(tst.DEX||0)+(tsk.dodge||0);
+  if(dodge>=hit){pr.addLog({who:s.name,type:"dodge",label:"🤝 "+s.name+" → "+tgt.name+": промах (уклон "+dodge+" ≥ "+hit+")",detail:"",total:hit});sRollP({label:s.name+" → "+tgt.name,d10:R.d,crit:R.crit,fumble:R.fumble,parts:[{label:atName,value:rv},{label:"нав",value:skVal}],total:hit,subtext:"🛡 Уклонился ("+dodge+")"});return;}
+  var m=(w.dice||"1d6").match(/(\d+)d(\d+)/);var dice=m?rN(parseInt(m[1]),parseInt(m[2])):[r1(6)];
+  var zoneD=r1(6);var zoneObj=ZONES[zoneD-1];var crit=R.crit?1.5:1;var rawDmg=Math.floor((sm(dice)+(w.bonus||0))*crit);var mult=Math.floor(rawDmg*zoneObj.mult);
+  var at=zoneObj.slot==="head"?(tgt.armorHead||"none"):(tgt.armorBody||"none");var ahp=zoneObj.slot==="head"?(tgt.armorHeadHp||0):(tgt.armorBodyHp||0);if(ahp<=0)at="none";
+  var ae=zoneObj.ignoreArmor?{ad:0,hd:mult,desc:"🔓"+zoneObj.name}:calcAE(at,w.dmgType||"Р",mult);
+  var newHp=Math.max(0,(tgt.hp||0)-ae.hd);var upd=Object.assign({},tgt,{hp:newHp});
+  if(ae.ad>0){if(zoneObj.slot==="head")upd.armorHeadHp=Math.max(0,(tgt.armorHeadHp||0)-ae.ad);else upd.armorBodyHp=Math.max(0,(tgt.armorBodyHp||0)-ae.ad);}
+  updateSpawned(npcTgtId,upd);
+  pr.addLog({who:s.name,type:"dmg",label:"🤝 "+s.name+" → "+tgt.name+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP"+(R.crit?" 🌟":""),detail:hit+" vs "+dodge+" | "+ae.desc+" | ❤️ "+(tgt.hp||0)+"→"+newHp,total:ae.hd});
+  sRollP({label:s.name+" → "+tgt.name,d10:R.d,crit:R.crit,fumble:R.fumble,parts:[{label:atName,value:rv},{label:"нав",value:skVal}],total:hit,subtext:"💥 "+ae.hd+" урона ("+zoneObj.name+")\n❤️ "+(tgt.hp||0)+"→"+newHp});
+}
 
 return(<div style={{flex:1,display:"flex",flexDirection:"column"}}>
 <RollPopup roll={rollP} onClose={function(){sRollP(null)}}/>
@@ -195,21 +218,22 @@ return <button key={pc._fbId} onClick={function(){sPlayerTgt(isSel?null:pc._fbId
 {/* NPC на поле боя */}
 {Object.keys(spawned).length>0&&<div style={{border:"2px solid #ef444420",borderRadius:9,padding:"6px 8px",background:"#2a1414"}}>
 <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,color:"#ef4444",marginBottom:4}}>⚔️ На поле боя</div>
+<div style={{display:"flex",flexWrap:"wrap",gap:2,marginBottom:5,alignItems:"center"}}><span style={{fontSize:8,color:"#a89a82"}}>🎯 Цель для союзников:</span>{Object.entries(spawned).filter(function(e){var hp=e[1].hp!==undefined?e[1].hp:e[1].maxHp;return hp>0}).map(function(e){var nid=e[0];var n=e[1];var on=npcTgtId===nid;return <button key={nid} onClick={function(){sNpcTgt(on?null:nid)}} style={{padding:"2px 6px",borderRadius:5,border:"2px solid "+(on?"#ef4444":"#322d24"),background:on?"#311717":"#1d1a14",fontSize:8,fontWeight:on?700:400,cursor:"pointer",color:n.side==="ally"?"#34d399":"#ece5d8"}}>{(n.side==="ally"?"🤝":"⚔️")+n.name}</button>})}</div>
 {Object.entries(spawned).map(function(e){var id=e[0];var s=e[1];var hpP=s.maxHp>0?((s.hp||0)/s.maxHp)*100:0;var st=s.stats||{};var sk=s.skills||{};var wpns=s.weapons||[];
 return <div key={id} style={{background:"#262219",border:"1px solid #322d24",borderRadius:7,padding:"5px 7px",marginBottom:4}}>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontWeight:700,fontSize:11}}>{s.name} <span style={{fontSize:8,color:"#a89a82"}}>Ур.{s.level}</span></span><button onClick={function(){if(window.confirm("Убрать "+s.name+"?"))despawn(id)}} style={{fontSize:8,background:"none",border:"none",color:"#ef4444",cursor:"pointer"}}>✕</button></div>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontWeight:700,fontSize:11}}>{s.name} <span style={{fontSize:8,color:"#a89a82"}}>Ур.{s.level}</span></span><div style={{display:"flex",gap:4,alignItems:"center"}}><button onClick={function(){updateSpawned(id,Object.assign({},s,{side:s.side==="ally"?"enemy":"ally"}))}} title="Сторона: союзник/враг" style={{fontSize:8,padding:"1px 6px",borderRadius:4,border:"1px solid "+(s.side==="ally"?"#10b98140":"#ef444440"),background:s.side==="ally"?"#0e2018":"#2a1414",color:s.side==="ally"?"#34d399":"#ef4444",fontWeight:700,cursor:"pointer"}}>{s.side==="ally"?"🤝 союзник":"⚔️ враг"}</button><button onClick={function(){if(window.confirm("Убрать "+s.name+"?"))despawn(id)}} style={{fontSize:8,background:"none",border:"none",color:"#ef4444",cursor:"pointer"}}>✕</button></div></div>
 {(s.hp||0)<=0&&<div style={{background:"#ece5d8",borderRadius:5,padding:"3px 7px",marginTop:3,textAlign:"center",fontSize:9,color:"#262219",fontWeight:700}}>💀 Повержен</div>}
 <div style={{display:"flex",alignItems:"center",gap:3,marginTop:2}}><span style={{fontSize:8}}>❤️</span><div style={{flex:1,background:"#262219",borderRadius:3,height:8,overflow:"hidden"}}><div style={{height:"100%",width:hpP+"%",background:(s.hp||0)<=0?"#ece5d8":"#ef4444",borderRadius:3}}/></div><div style={{display:"flex",gap:1}}>{[-5,-1,1,5].map(function(d){return <button key={d} onClick={function(){updateSpawned(id,Object.assign({},s,{hp:Math.max(0,Math.min(s.maxHp,(s.hp||0)+d))}))}} style={{padding:"1px 4px",borderRadius:3,fontSize:7,fontWeight:700,border:"1px solid #322d24",background:d<0?"#2a1414":"#0e2018",color:d<0?"#ef4444":"#10b981",cursor:"pointer"}}>{d>0?"+"+d:d}</button>})}</div><span style={{fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>{(s.hp||0)+"/"+s.maxHp}</span></div>
 {s.armorHead&&s.armorHead!=="none"&&<div style={{fontSize:7,color:"#94a3b8",marginTop:1}}>🧠 {s.armorHead} {s.armorHeadHp||0}/{s.armorHeadMaxHp||0}</div>}
 {s.armorBody&&s.armorBody!=="none"&&<div style={{fontSize:7,color:"#94a3b8"}}>🫀 {s.armorBody} {s.armorBodyHp||0}/{s.armorBodyMaxHp||0}</div>}
 <div style={{display:"flex",gap:2,marginTop:3,flexWrap:"wrap"}}>
 <div style={{display:"flex",gap:1,marginBottom:1}}>
-<button onClick={function(){npcAttack(s,FIST)}} title="Рукопашная (BODY+Brawl)" style={{padding:"2px 5px",borderRadius:4,border:"1px solid #f59e0b40",background:"#231b08",fontSize:7,fontWeight:700,color:"#f0b352",cursor:"pointer"}}>{"👊 Кулаки"+(playerTgtId?" →":"")}</button>
-<button onClick={function(){npcDmg(s,FIST)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #ef444420",background:"#2a1414",fontSize:7,fontWeight:700,color:"#dc2626",cursor:"pointer"}}>{"💥"+(playerTgtId?" →":"")}</button>
+<button onClick={function(){s.side==="ally"?npcVsNpc(s,FIST):npcAttack(s,FIST)}} title="Рукопашная (BODY+Brawl)" style={{padding:"2px 5px",borderRadius:4,border:"1px solid #f59e0b40",background:"#231b08",fontSize:7,fontWeight:700,color:"#f0b352",cursor:"pointer"}}>{"👊 Кулаки"+(s.side==="ally"?(npcTgtId?" ⚔️":""):(playerTgtId?" →":""))}</button>
+{s.side!=="ally"&&<button onClick={function(){npcDmg(s,FIST)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #ef444420",background:"#2a1414",fontSize:7,fontWeight:700,color:"#dc2626",cursor:"pointer"}}>{"💥"+(playerTgtId?" →":"")}</button>}
 </div>
 {wpns.map(function(w,wi){return <div key={wi} style={{display:"flex",gap:1,marginBottom:1}}>
-<button onClick={function(){npcAttack(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid "+(w.magic?"#7c3aed40":"#3b82f620"),background:w.magic?"#1f1330":"#0e1a2b",fontSize:7,fontWeight:700,color:w.magic?"#a78bfa":"#60a5fa",cursor:"pointer"}}>{(w.magic?"🔮 ":"🎯 ")+w.name+(playerTgtId?" →":"")}</button>
-<button onClick={function(){npcDmg(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #ef444420",background:"#2a1414",fontSize:7,fontWeight:700,color:"#dc2626",cursor:"pointer"}}>{"💥"+(playerTgtId?" →":"")}</button>
+<button onClick={function(){s.side==="ally"?npcVsNpc(s,w):npcAttack(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid "+(w.magic?"#7c3aed40":"#3b82f620"),background:w.magic?"#1f1330":"#0e1a2b",fontSize:7,fontWeight:700,color:w.magic?"#a78bfa":"#60a5fa",cursor:"pointer"}}>{(w.magic?"🔮 ":"🎯 ")+w.name+(s.side==="ally"?(npcTgtId?" ⚔️":""):(playerTgtId?" →":""))}</button>
+{s.side!=="ally"&&<button onClick={function(){npcDmg(s,w)}} style={{padding:"2px 5px",borderRadius:4,border:"1px solid #ef444420",background:"#2a1414",fontSize:7,fontWeight:700,color:"#dc2626",cursor:"pointer"}}>{"💥"+(playerTgtId?" →":"")}</button>}
 </div>})}
 <button onClick={function(){npcMagic(s,id)}} style={{padding:"3px 5px",borderRadius:4,border:"1px solid #7c3aed20",background:"#1f1330",fontSize:7,fontWeight:700,color:"#7c3aed",cursor:"pointer"}}>{"🔮"+(playerTgtId?" →":"")}</button>
 <button onClick={function(){var R=rollHit();var d=R.d;var dv=st.DEX||0;var dg=sk.dodge||0;var t=d+dv+dg;sRollP({label:s.name+" — Уклонение",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"DEX",value:dv},{label:"Dodge",value:dg}],total:t});pr.addLog({who:s.name,type:"dodge",label:"🛡️ Уклонение"+(R.crit?" 🌟":R.fumble?" 💀":""),detail:"🎲"+d+" + DEX("+dv+") + Dodge("+dg+") = "+t,total:t})}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #10b98120",background:"#0e2018",fontSize:8,fontWeight:700,color:"#34d399",cursor:"pointer"}}>🛡️ Уклон.</button>

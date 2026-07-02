@@ -26,6 +26,7 @@ var _nc=useState("#ef4444");var nc=_nc[0];var sNC=_nc[1];
 var _ns=useState(6);var ns=_ns[0];var sNS=_ns[1];
 var _zoom=useState(1);var zoom=_zoom[0];var sZoom=_zoom[1];
 var _et=useState(null);var editTk=_et[0];var sEditTk=_et[1];
+var _pc=useState("#3b82f6");var pColor=_pc[0];var sPColor=_pc[1];
 /* allT — во время перетаскивания используем локальную копию (liveT), чтобы не писать
    огромную карту (base64) в Firebase на каждое движение мыши. Сохраняем на отпускании. */
 var allT=liveT||tokens.slice();
@@ -118,7 +119,10 @@ return <div style={{display:"flex",flexDirection:"column",gap:6}}>
 </div>
 {canEdit&&editTk===t.id&&<div style={{display:"flex",gap:2,flexWrap:"wrap",marginTop:4,paddingTop:4,borderTop:"1px solid #322d24"}}>{TOKEN_COLORS.map(function(cl){return <button key={cl} onClick={function(){updTk(t.id,{color:cl});sEditTk(null)}} style={{width:16,height:16,borderRadius:"50%",background:cl,border:(t.color===cl)?"2px solid #cabfa9":"1px solid #333333",cursor:"pointer",flexShrink:0,padding:0}}/>})}</div>}
 </div>})}</div>
-{!isGM&&cId&&!allT.find(function(t){return t.charId===cId})&&<button onClick={function(){var me=chars.find(function(c2){return(c2._fbId||c2.id)===cId});saveTk(tokens.concat([{id:"ch-"+cId,charId:cId,name:me?me.name:"?",x:50,y:50,color:"#3b82f6",size:6,type:"player"}]))}} style={{padding:"6px 12px",borderRadius:7,border:"2px solid #3b82f630",background:"#0e1a2b",fontWeight:700,fontSize:10,color:"#60a5fa",cursor:"pointer",width:"100%"}}>📍 Создать мой жетон на карте</button>}
+{!isGM&&cId&&!allT.find(function(t){return t.charId===cId})&&<div style={{display:"flex",flexDirection:"column",gap:4}}>
+<div style={{display:"flex",gap:2,flexWrap:"wrap",justifyContent:"center"}}>{TOKEN_COLORS.map(function(cl){return <button key={cl} onClick={function(){sPColor(cl)}} style={{width:18,height:18,borderRadius:"50%",background:cl,border:pColor===cl?"3px solid #cabfa9":"1.5px solid #333333",cursor:"pointer",flexShrink:0,padding:0}}/>})}</div>
+<button onClick={function(){var me=chars.find(function(c2){return(c2._fbId||c2.id)===cId});saveTk(tokens.concat([{id:"ch-"+cId,charId:cId,name:me?me.name:"?",x:50,y:50,color:pColor,size:6,type:"player"}]))}} style={{padding:"6px 12px",borderRadius:7,border:"2px solid #3b82f630",background:"#0e1a2b",fontWeight:700,fontSize:10,color:"#60a5fa",cursor:"pointer",width:"100%"}}>📍 Создать мой жетон ({pColor==="#3b82f6"?"цвет по умолч.":"выбран цвет"})</button>
+</div>}
 {isGM&&<div style={{display:"flex",gap:3}}><button onClick={function(){sSN(!sn)}} style={{flex:1,padding:6,borderRadius:6,border:"2px solid #ef444420",background:"#2a1414",fontWeight:700,fontSize:9,color:"#ef4444",cursor:"pointer"}}>{sn?"✕":"👹 + Жетон"}</button><label style={{padding:"6px 10px",borderRadius:6,border:"2px solid #10b98120",background:"#0e2018",fontWeight:700,fontSize:9,color:"#34d399",cursor:"pointer",textAlign:"center"}}>🖼️ Сменить<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setImg(ev.target.result)};r.readAsDataURL(f)}}/></label></div>}
 {isGM&&sn&&<div style={{background:"#2a1414",border:"1px solid #ef444420",borderRadius:7,padding:6,display:"flex",flexDirection:"column",gap:4}}><input style={S.inp} value={nn} onChange={function(e){sNN(e.target.value)}} placeholder="Имя жетона"/>
 <div style={{display:"flex",gap:2,flexWrap:"wrap"}}>{TOKEN_COLORS.map(function(cl){return <button key={cl} onClick={function(){sNC(cl)}} style={{width:18,height:18,borderRadius:"50%",background:cl,border:nc===cl?"3px solid #cabfa9":"1.5px solid #333333",boxShadow:nc===cl?"0 0 0 2px "+cl:"none",cursor:"pointer",flexShrink:0}}/>})}</div>
