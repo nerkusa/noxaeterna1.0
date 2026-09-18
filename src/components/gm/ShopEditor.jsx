@@ -49,11 +49,11 @@ export default function ShopEditor(pr) {
   const add = function () {
     const base = {
       armor: { cat: 'armor', name: 'Новая броня', type: 'light', hp: 10, price: '' },
-      weapon: { cat: 'weapon', name: 'Новое оружие', wtype: 'Battle', dmgDice: '1d6', dmgType: 'Р', hands: 1, bonus: 0, dmgDice2h: '2d6', bonus2h: 0, price: '' },
-      shield: { cat: 'shield', name: 'Новый щит', type: 'light', hp: 15, price: '' },
+      weapon: { cat: 'weapon', name: 'Новое оружие', wtype: 'Battle', dmgDice: '1d6', dmgType: 'Р', hands: 1, bonus: 0, dmgDice2h: '2d6', bonus2h: 0, desc: '', price: '' },
+      shield: { cat: 'shield', name: 'Новый щит', type: 'light', hp: 15, desc: '', price: '' },
       item: { cat: 'item', name: 'Новый предмет', desc: '', price: '' },
       tool: { cat: 'tool', name: 'Лёгкий набор инструментов', dice: '1d4', desc: 'Починка снаряжения', price: '' },
-      ammo: { cat: 'ammo', name: 'Стрелы', ptype: 'Стрела', price: '' },
+      ammo: { cat: 'ammo', name: 'Стрелы', ptype: 'Стрела', desc: '', price: '' },
     }[cat];
     const it = Object.assign({ id: uid() }, base);
     persist(shop.concat([it]));
@@ -65,10 +65,10 @@ export default function ShopEditor(pr) {
 
   function summary(it) {
     if (it.cat === 'armor') { const a = ARMOR_T.find(function (x) { return x.id === it.type; }); return (a ? a.name : it.type) + ' · ' + it.hp + ' HP'; }
-    if (it.cat === 'shield') { const s = SHIELD_T.find(function (x) { return x.id === it.type; }); return (s ? s.name + ' ' + (s.absorb * 100) + '%' : it.type) + ' · ' + it.hp + ' HP'; }
-    if (it.cat === 'weapon') { const h = it.hands === 2 ? 'двуруч.' : it.hands === 1.5 ? 'полуторн.' : 'одноруч.'; return it.wtype + ' · ' + it.dmgDice + (it.bonus ? '+' + it.bonus : '') + ' · ' + it.dmgType + ' · ' + h; }
+    if (it.cat === 'shield') { const s = SHIELD_T.find(function (x) { return x.id === it.type; }); return (s ? s.name + ' ' + (s.absorb * 100) + '%' : it.type) + ' · ' + it.hp + ' HP' + (it.desc ? ' · ' + it.desc : ''); }
+    if (it.cat === 'weapon') { const h = it.hands === 2 ? 'двуруч.' : it.hands === 1.5 ? 'полуторн.' : 'одноруч.'; return it.wtype + ' · ' + it.dmgDice + (it.bonus ? '+' + it.bonus : '') + ' · ' + it.dmgType + ' · ' + h + (it.desc ? ' · ' + it.desc : ''); }
     if (it.cat === 'tool') { return '🔧 Починка ' + (it.dice || '1d4') + (it.desc ? ' · ' + it.desc : ''); }
-    if (it.cat === 'ammo') { return '🏹 ' + (it.ptype || 'Стрела'); }
+    if (it.cat === 'ammo') { return '🏹 ' + (it.ptype || 'Стрела') + (it.desc ? ' · ' + it.desc : ''); }
     return it.desc || '';
   }
 
@@ -94,6 +94,7 @@ export default function ShopEditor(pr) {
             {field('HP щита', <input type="number" value={it.hp} onChange={function (e) { upd(it.id, { hp: parseInt(e.target.value) || 1 }); }} style={inp} />)}
             {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} style={inp} />)}
           </div>
+          {field('Описание', <textarea value={it.desc || ''} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 32, resize: 'vertical' })} />)}
         </div>
       );
     }
@@ -122,6 +123,7 @@ export default function ShopEditor(pr) {
               {field('Бонус (2 руки)', <input type="number" value={it.bonus2h} onChange={function (e) { upd(it.id, { bonus2h: parseInt(e.target.value) || 0 }); }} style={inp} />)}
             </div>
           )}
+          {field('Описание', <textarea value={it.desc || ''} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 32, resize: 'vertical' })} />)}
         </div>
       );
     }
@@ -146,6 +148,7 @@ export default function ShopEditor(pr) {
             {field('Тип снаряда', <select value={it.ptype || 'Стрела'} onChange={function (e) { upd(it.id, { ptype: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{PROJ_TYPES.map(function (p) { return <option key={p} value={p}>{p}</option>; })}</select>)}
             {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} style={inp} />)}
           </div>
+          {field('Описание', <textarea value={it.desc || ''} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 32, resize: 'vertical' })} />)}
           <div style={{ fontSize: 8, color: '#a89a82', fontStyle: 'italic' }}>Игрок берёт их в инвентарь; перезарядка оружия тратит снаряды нужного типа.</div>
         </div>
       );
